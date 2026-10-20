@@ -1,0 +1,20 @@
+# 97MB boyutundaki derlenmiş ikili dosya (scripts/download_apt_tools.sh ile otomatik indirilir)
+bin/aptly
+bin/*.bak
+
+# Doğrudan klonlanan resmi upstream depolar (scripts/download_apt_tools.sh ile çekilir)
+sources/*
+!sources/.gitkeep
+
+# Geçici dosyalar ve loglar
+*.tmp
+*.temp
+*.log
+.DS_Store
+Thumbs.db
+__pycache__/
+
+# Yerel Aptly çalışma dizini ve anahtarlar
+.aptly/
+secring.gpg
+pubring.gpg

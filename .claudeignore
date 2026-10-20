@@ -1,0 +1,23 @@
+# Büyük ikili (binary) dosyalar
+bin/aptly
+bin/aptly.bak
+*.zip
+*.tar.gz
+*.deb
+
+# Örnek paketler ve geçici dosyalar
+sample_packages/*.deb
+custom_packages/*.deb
+*.tmp
+*.temp
+
+# Klonlanan git alt depolarının dahili .git dizinleri (gereksiz context tüketimini önlemek için)
+sources/*/.git/
+sources/*/build/
+sources/*/vendor/
+
+# Sistem ve geçici dosyalar
+.DS_Store
+Thumbs.db
+__pycache__/
+*.log

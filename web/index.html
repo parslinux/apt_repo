@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APT Depo Yönetim Paneli</title>
+    <meta name="description" content="Modern, hızlı ve açık kaynak APT Repository kontrol paneli. Paket arama, istemci yapılandırma ve durum izleme.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Arka Plan Efekt Işıkları -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Üst Başlık (Navbar) -->
+    <header class="navbar" id="mainNavbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">APT Depo Paneli</span>
+                    <span class="brand-badge">Aptly v1.6.3 Engine</span>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <div class="server-status" id="serverStatusBadge">
+                    <span class="status-dot"></span>
+                    <span class="status-label" id="statusLabel">Sunucu Aktif</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btnRefresh" title="Verileri Yenile">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    <span>Yenile</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ana Konteyner -->
+    <main class="main-content">
+        <!-- İstatistik Kartları -->
+        <section class="stats-grid" id="statsSection">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Toplam Depo</span>
+                    <h3 class="stat-value" id="statRepoCount">--</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Paket Sayısı</span>
+                    <h3 class="stat-value" id="statPackageCount">--</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-emerald">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Yayınlanan Dağıtım</span>
+                    <h3 class="stat-value" id="statPublishCount">--</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-amber">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Disk Alanı</span>
+                    <h3 class="stat-value" id="statDiskUsage">--</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekmeler (Tabs) -->
+        <nav class="tabs-nav" id="tabsNav">
+            <button class="tab-btn active" data-tab="packagesTab" id="tabBtnPackages">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16.5 9.4 7.55 4.24a1.79 1.79 0 0 0-1.8 0L3.1 5.75a1.8 1.8 0 0 0 0 3.12l8.95 5.16a1.79 1.79 0 0 0 1.8 0l8.95-5.16a1.8 1.8 0 0 0 0-3.12l-2.65-1.53z"></path>
+                    <path d="m3.1 14.85 2.65 1.53a1.79 1.79 0 0 0 1.8 0l8.95-5.16a1.8 1.8 0 0 0 0-3.12"></path>
+                    <path d="m3.1 19.45 2.65 1.53a1.79 1.79 0 0 0 1.8 0l8.95-5.16a1.8 1.8 0 0 0 0-3.12"></path>
+                </svg>
+                <span>Paket Kataloğu</span>
+            </button>
+
+            <button class="tab-btn" data-tab="setupTab" id="tabBtnSetup">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>İstemci Kurulumu (Sources.list)</span>
+            </button>
+
+            <button class="tab-btn" data-tab="reposTab" id="tabBtnRepos">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+                <span>Depo Mimarisi</span>
+            </button>
+
+            <button class="tab-btn" data-tab="uploadTab" id="tabBtnUpload">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Paket Yükle (.deb)</span>
+            </button>
+        </nav>
+
+        <!-- SEKME 1: PAKET KATALOĞU -->
+        <div class="tab-content active" id="packagesTab">
+            <!-- Arama & Filtre Çubuğu -->
+            <div class="filter-card">
+                <div class="search-input-group">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Paket adı, açıklama veya mimariye göre ara..." autocomplete="off">
+                </div>
+                <div class="filter-select-group">
+                    <select id="repoFilterSelect" aria-label="Depo Filtrele">
+                        <option value="all">Tüm Depolar</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Paket Kartları Grid -->
+            <div class="packages-grid" id="packagesGrid">
+                <div class="loading-state" id="packagesLoadingState">
+                    <div class="spinner"></div>
+                    <p>Paketler taranıyor...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEKME 2: İSTEMCİ KURULUMU (SOURCES.LIST GENERATOR) -->
+        <div class="tab-content" id="setupTab">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">Debian / Ubuntu İstemci Bağlantısı</h2>
+                        <p class="panel-subtitle">Bu deponun paketlerini kurmak isteyen istemci makinelerde aşağıdaki adımları uygulayın.</p>
+                    </div>
+                </div>
+
+                <!-- Hızlı Tek Satır Kurulum Kutusu -->
+                <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15)); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;">
+                        <span style="font-size: 1.2rem;">⚡</span>
+                        <h4 style="font-size: 1.05rem; font-weight: 700; color: #fff;">Tek Komutla Otomatik Kurulum</h4>
+                        <span class="badge badge-emerald">Önerilen</span>
+                    </div>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.85rem;">İstemci makinenizde sadece şu tek satırı çalıştırarak GPG anahtarını ve depo listesini otomatik kurabilirsiniz:</p>
+                    <div class="code-box">
+                        <pre><code id="codeOneLineInstall">curl -sSL http://localhost:8080/install.sh | sudo bash</code></pre>
+                        <button class="copy-btn" data-copy="codeOneLineInstall" title="Kopyala">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            <span>Kopyala</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="setup-steps">
+                    <!-- Adım 1 -->
+                    <div class="setup-step">
+                        <div class="step-badge">1</div>
+                        <div class="step-body">
+                            <h4 class="step-title">Depo Adresini Sources Listesine Ekleyin</h4>
+                            <p class="step-desc">İstemci makinede <code>/etc/apt/sources.list.d/ozel-depo.list</code> dosyasını tek komutla oluşturun:</p>
+                            <div class="code-box">
+                                <pre><code id="codeSourcesLine">echo "deb [trusted=yes] http://localhost:8080/ bookworm main" | sudo tee /etc/apt/sources.list.d/ozel-depo.list</code></pre>
+                                <button class="copy-btn" data-copy="codeSourcesLine" title="Kopyala">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Adım 2 -->
+                    <div class="setup-step">
+                        <div class="step-badge">2</div>
+                        <div class="step-body">
+                            <h4 class="step-title">Paket Listelerini Güncelleyin</h4>
+                            <p class="step-desc">Yeni eklenen deponun meta verilerini ve paket listesini çekin:</p>
+                            <div class="code-box">
+                                <pre><code id="codeAptUpdate">sudo apt update</code></pre>
+                                <button class="copy-btn" data-copy="codeAptUpdate" title="Kopyala">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Adım 3 -->
+                    <div class="setup-step">
+                        <div class="step-badge">3</div>
+                        <div class="step-body">
+                            <h4 class="step-title">İstediğiniz Paketi Kurun</h4>
+                            <p class="step-desc">Artık depodaki paketleri standart apt aracıyla kurabilirsiniz:</p>
+                            <div class="code-box">
+                                <pre><code id="codeAptInstall">sudo apt install hello</code></pre>
+                                <button class="copy-btn" data-copy="codeAptInstall" title="Kopyala">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEKME 3: DEPO MİMARİSİ -->
+        <div class="tab-content" id="reposTab">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">Tanımlı Yerel Depolar ve Yayınlar</h2>
+                        <p class="panel-subtitle">Aptly veritabanındaki yerel depolar, yayınlanan dağıtımlar ve depolama durumları.</p>
+                    </div>
+                </div>
+
+                <div class="repo-tree-container" id="repoTreeContainer">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Depo mimarisi yükleniyor...</p>
+                    </div>
+                </div>
+        </div>
+
+        <!-- SEKME 4: PAKET YÜKLEME FORMU -->
+        <div class="tab-content" id="uploadTab">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">Depoya Yeni Paket Yükle</h2>
+                        <p class="panel-subtitle">Yerel bilgisayarınızdaki .deb paketlerini sürükleyip bırakarak depoya ekleyin ve anında yayınlayın.</p>
+                    </div>
+                </div>
+
+                <div class="upload-container">
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="uploadTargetRepo" style="display: block; font-size: 0.9rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">Hedef Depo:</label>
+                        <select id="uploadTargetRepo" style="background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-color); color: #fff; padding: 0.65rem 1rem; border-radius: 10px; width: 100%; max-width: 360px; font-family: inherit; font-size: 0.9rem; outline: none;">
+                            <!-- Dinamik dolar -->
+                        </select>
+                    </div>
+
+                    <div class="dropzone" id="dropzone">
+                        <div class="dropzone-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <h4 class="dropzone-title">.deb Dosyalarını Buraya Sürükleyip Bırakın</h4>
+                        <p class="dropzone-subtitle">veya dosya seçmek için tıklayın</p>
+                        <input type="file" id="fileInput" accept=".deb" multiple style="display: none;">
+                    </div>
+
+                    <div id="uploadSelectedFiles" style="margin-top: 1.5rem; display: none;">
+                        <h5 style="color: #fff; font-size: 0.95rem; margin-bottom: 0.6rem;">Seçilen Paketler:</h5>
+                        <ul id="selectedFilesList" style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;"></ul>
+                        <div style="margin-top: 1.25rem; display: flex; gap: 1rem; align-items: center;">
+                            <button class="btn btn-primary" id="btnSubmitUpload">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Depoya Yükle ve Yayınla</span>
+                            </button>
+                            <span id="uploadProgressText" style="font-size: 0.88rem; color: var(--text-muted);"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Paket Detay Modalı -->
+    <div class="modal-overlay" id="packageModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h3 class="modal-title" id="modalPkgName">Paket Adı</h3>
+                    <span class="badge badge-primary" id="modalPkgVersion">v1.0.0</span>
+                </div>
+                <button class="modal-close-btn" id="modalCloseBtn" aria-label="Kapat">&times;</button>
+            </div>
+            <div class="modal-body" id="modalPkgBody">
+                <!-- Dinamik detaylar buraya gelir -->
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="modalDownloadBtn" download>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span>.deb İndir</span>
+                </a>
+                <button class="btn btn-secondary" id="modalCloseFooterBtn">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bildirim (Toast) Konteyneri -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

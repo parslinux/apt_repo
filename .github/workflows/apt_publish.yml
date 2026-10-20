@@ -1,0 +1,46 @@
+name: APT Deposu Otomatik Yayınlama (CI/CD)
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "custom_packages/**"
+      - "scripts/**"
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodu Çek
+        uses: actions/checkout@v4
+
+      - name: Gerekli Paketleri Kur
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bzip2 xz-utils gnupg curl
+
+      - name: Aptly ve Araçları İndir
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/download_apt_tools.sh --binaries-only
+
+      - name: Depoyu Oluştur ve Paketleri Ekle
+        run: |
+          ./scripts/01_create_repo.sh "uretim-depo" "bookworm" "main" "GitHub Actions Deposu"
+          if [ -d "custom_packages" ]; then
+            for deb in custom_packages/*.deb; do
+              [ -e "$deb" ] && ./scripts/02_add_package.sh "uretim-depo" "$deb"
+            done
+          fi
+
+      - name: Depoyu Yayınla (Publish)
+        run: |
+          ./scripts/03_publish_repo.sh "uretim-depo"
+
+      - name: Yayınlanan Dosyaları Arşivle (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: apt-repository-public
+          path: ~/.aptly/public/

@@ -67,6 +67,15 @@ def parse_packages_file():
                         "maintainer": pkg.get("maintainer", ""),
                         "description": pkg.get("description", ""),
                         "filename": pkg.get("filename", ""),
+                        "depends": pkg.get("depends", ""),
+                        "pre_depends": pkg.get("pre-depends", ""),
+                        "recommends": pkg.get("recommends", ""),
+                        "suggests": pkg.get("suggests", ""),
+                        "conflicts": pkg.get("conflicts", ""),
+                        "breaks": pkg.get("breaks", ""),
+                        "provides": pkg.get("provides", ""),
+                        "installed_size": pkg.get("installed-size", ""),
+                        "homepage": pkg.get("homepage", ""),
                         "repo": p_file.parts[-4] if len(p_file.parts) >= 4 else "main"
                     })
         except Exception as e:
@@ -110,6 +119,23 @@ def get_repos_info():
                 "packages": pkgs
             })
     return repos
+
+def get_gpg_key():
+    candidates = [
+        PUBLIC_DIR / "public.key",
+        ROOT_DIR / "keys" / "repo_public.key",
+        Path.home() / ".aptly" / "public.key"
+    ]
+    for c in candidates:
+        if c.is_file():
+            return c.read_bytes()
+    try:
+        res = subprocess.run(["gpg", "--armor", "--export"], capture_output=True, timeout=3)
+        if res.returncode == 0 and res.stdout:
+            return res.stdout
+    except Exception:
+        pass
+    return None
 
 class AptlyDashboardHandler(SimpleHTTPRequestHandler):
     def send_json_response(self, data, code=200):
@@ -164,6 +190,20 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
                 # Yayını güncelle
                 run_cmd([str(APTLY_BIN), "publish", "update", "-skip-signing", "bookworm"])
 
+                # Webhook bildirimini arka planda tetikle
+                notify_sh = ROOT_DIR / "scripts" / "notify_webhook.sh"
+                if notify_sh.is_file():
+                    for fname, fpath in uploaded_files:
+                        try:
+                            p_name = run_cmd(["dpkg-deb", "-f", str(fpath), "Package"]) or fname.replace(".deb", "")
+                            p_ver = run_cmd(["dpkg-deb", "-f", str(fpath), "Version"]) or "1.0.0"
+                            p_arch = run_cmd(["dpkg-deb", "-f", str(fpath), "Architecture"]) or "amd64"
+                            p_desc = run_cmd(["dpkg-deb", "-f", str(fpath), "Description"]) or "Web panelinden yüklendi."
+                            p_desc = p_desc.splitlines()[0] if p_desc else "Web panelinden yüklendi."
+                            subprocess.Popen([str(notify_sh), p_name, p_ver, p_arch, target_repo, p_desc])
+                        except Exception as we:
+                            print(f"[Webhook Bildirim Hatası] {we}", file=sys.stderr)
+
                 return self.send_json_response({
                     "success": True,
                     "message": f"{len(added_info)} paket '{target_repo}' deposuna eklendi ve yayın güncellendi.",
@@ -172,6 +212,16 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
                 })
             except Exception as e:
                 return self.send_json_response({"success": False, "error": f"Yükleme hatası: {str(e)}"}, 500)
+
+        elif parsed.path == "/api/webhook/test":
+            notify_sh = ROOT_DIR / "scripts" / "notify_webhook.sh"
+            if notify_sh.is_file():
+                res = subprocess.run([str(notify_sh), "--test"], capture_output=True, text=True, timeout=10)
+                return self.send_json_response({
+                    "success": res.returncode == 0,
+                    "output": (res.stdout + res.stderr).strip()
+                })
+            return self.send_json_response({"success": False, "error": "notify_webhook.sh betiği bulunamadı."}, 404)
 
         self.send_error(404, "Endpoint bulunamadı")
 
@@ -220,6 +270,30 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             repos = get_repos_info()
             self.wfile.write(json.dumps({"repos": repos}).encode("utf-8"))
+            return
+
+        elif path in ("/public.key", "/key.gpg", "/api/gpg-key"):
+            key_data = get_gpg_key()
+            if key_data:
+                self.send_response(200)
+                self.send_header("Content-Type", "application/pgp-keys; charset=utf-8")
+                self.send_header("Content-Disposition", 'attachment; filename="parslinux-archive-keyring.gpg"')
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(key_data if isinstance(key_data, bytes) else key_data.encode("utf-8"))
+                return
+            else:
+                self.send_json_response({"error": "GPG genel anahtarı bulunamadı. Lütfen önce ./scripts/setup_gpg_keys.sh çalıştırın."}, 404)
+                return
+
+        elif path == "/api/webhook/status":
+            env_file = ROOT_DIR / ".webhook.env"
+            user_env = Path.home() / ".aptly" / "webhook.env"
+            has_conf = env_file.is_file() or user_env.is_file()
+            self.send_json_response({
+                "configured": has_conf,
+                "file": str(user_env if user_env.is_file() else env_file)
+            })
             return
 
         # 2. Web UI Dosyaları (index.html, index.css, app.js, install.sh)

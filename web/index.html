@@ -38,6 +38,12 @@
                     <span class="status-dot"></span>
                     <span class="status-label" id="statusLabel">Sunucu Aktif</span>
                 </div>
+                <a href="/public.key" download="parslinux-archive-keyring.gpg" class="btn btn-secondary btn-sm" id="btnDownloadGpgNav" title="GPG Depo İmza Anahtarını İndir">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2l-2 2m-1-1l-3 3m5 5l-6-6-7 7a5 5 0 0 0 7 7l6-6z"></path>
+                    </svg>
+                    <span>GPG Anahtarı</span>
+                </a>
                 <button class="btn btn-secondary btn-sm" id="btnRefresh" title="Verileri Yenile">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
@@ -139,6 +145,14 @@
                 </svg>
                 <span>Paket Yükle (.deb)</span>
             </button>
+
+            <button class="tab-btn" data-tab="webhookTab" id="tabBtnWebhook">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span>Webhook Bildirimleri</span>
+            </button>
         </nav>
 
         <!-- SEKME 1: PAKET KATALOĞU -->
@@ -182,7 +196,7 @@
                 <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15)); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem;">
                     <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem;">
                         <span style="font-size: 1.2rem;">⚡</span>
-                        <h4 style="font-size: 1.05rem; font-weight: 700; color: #fff;">Tek Komutla Otomatik Kurulum</h4>
+                        <h4 style="font-size: 1.05rem; font-weight: 700; color: #fff;">Tek Komutla Otomatik Kurulum (GPG + Depo)</h4>
                         <span class="badge badge-emerald">Önerilen</span>
                     </div>
                     <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.85rem;">İstemci makinenizde sadece şu tek satırı çalıştırarak GPG anahtarını ve depo listesini otomatik kurabilirsiniz:</p>
@@ -196,14 +210,46 @@
                 </div>
 
                 <div class="setup-steps">
+                    <!-- Adım 0: GPG İmzalı Kurulum (Önerilen) -->
+                    <div class="setup-step">
+                        <div class="step-badge" style="background: #10b981;">🔑</div>
+                        <div class="step-body">
+                            <h4 class="step-title">GPG Anahtarını İndirin ve Doğrulayın (Güvenli Yöntem)</h4>
+                            <p class="step-desc">Resmi Debian standartlarına uygun olarak genel anahtarı <code>/etc/apt/keyrings/</code> dizinine kaydedin:</p>
+                            <div class="code-box">
+                                <pre><code id="codeGpgKeyImport">sudo mkdir -p /etc/apt/keyrings && curl -fsSL http://localhost:8080/public.key | sudo gpg --dearmor --yes -o /etc/apt/keyrings/parslinux-archive-keyring.gpg</code></pre>
+                                <button class="copy-btn" data-copy="codeGpgKeyImport" title="Kopyala">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Adım 1 -->
                     <div class="setup-step">
                         <div class="step-badge">1</div>
                         <div class="step-body">
-                            <h4 class="step-title">Depo Adresini Sources Listesine Ekleyin</h4>
-                            <p class="step-desc">İstemci makinede <code>/etc/apt/sources.list.d/ozel-depo.list</code> dosyasını tek komutla oluşturun:</p>
+                            <h4 class="step-title">GPG İmzalı Depo Adresini Sources Listesine Ekleyin</h4>
+                            <p class="step-desc">İstemci makinede <code>/etc/apt/sources.list.d/parslinux.list</code> dosyasını oluşturun:</p>
                             <div class="code-box">
-                                <pre><code id="codeSourcesLine">echo "deb [trusted=yes] http://localhost:8080/ bookworm main" | sudo tee /etc/apt/sources.list.d/ozel-depo.list</code></pre>
+                                <pre><code id="codeSourcesGpgLine">echo "deb [signed-by=/etc/apt/keyrings/parslinux-archive-keyring.gpg] http://localhost:8080/ bookworm main" | sudo tee /etc/apt/sources.list.d/parslinux.list</code></pre>
+                                <button class="copy-btn" data-copy="codeSourcesGpgLine" title="Kopyala">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alternatif Güvensiz / Test Kurulumu -->
+                    <div class="setup-step">
+                        <div class="step-badge" style="background: #64748b;">⚡</div>
+                        <div class="step-body">
+                            <h4 class="step-title">Alternatif: GPG'siz Test Kurulumu (trusted=yes)</h4>
+                            <p class="step-desc">Test ortamları için imza kontrolü olmadan hızlıca bağlanmak isterseniz:</p>
+                            <div class="code-box">
+                                <pre><code id="codeSourcesLine">echo "deb [trusted=yes] http://localhost:8080/ bookworm main" | sudo tee /etc/apt/sources.list.d/parslinux.list</code></pre>
                                 <button class="copy-btn" data-copy="codeSourcesLine" title="Kopyala">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                     <span>Kopyala</span>
@@ -312,11 +358,86 @@
                 </div>
             </div>
         </div>
+
+        <!-- SEKME 5: WEBHOOK BİLDİRİMLERİ (DISCORD / TELEGRAM / SLACK) -->
+        <div class="tab-content" id="webhookTab">
+            <div class="panel-card">
+                <div class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2 class="panel-title">📢 Webhook Bildirim Entegrasyonu</h2>
+                        <p class="panel-subtitle">Depoya yeni .deb paketi yüklendiğinde Discord, Telegram veya Slack kanallarına anında canlı duyuru gönderin.</p>
+                    </div>
+                    <div id="webhookStatusIndicator" class="badge badge-primary" style="font-size: 0.85rem; padding: 0.5rem 0.9rem;">
+                        Durum Kontrol Ediliyor...
+                    </div>
+                </div>
+
+                <div class="webhook-grid">
+                    <!-- Discord -->
+                    <div class="webhook-card">
+                        <div class="webhook-card-header">
+                            <div class="webhook-card-icon" style="background: rgba(88, 101, 242, 0.2); color: #5865F2;">🎮</div>
+                            <div>
+                                <h4 class="webhook-card-title">Discord</h4>
+                                <span class="badge badge-primary" style="font-size: 0.7rem;">Zengin Embed</span>
+                            </div>
+                        </div>
+                        <p class="webhook-card-desc">Kanal ayarlarına gidip bir Webhook URL'si oluşturun. Yeni paketler renkli başlık ve detay kartlarıyla iletilir.</p>
+                    </div>
+
+                    <!-- Telegram -->
+                    <div class="webhook-card">
+                        <div class="webhook-card-header">
+                            <div class="webhook-card-icon" style="background: rgba(36, 161, 222, 0.2); color: #24A1DE;">✈️</div>
+                            <div>
+                                <h4 class="webhook-card-title">Telegram</h4>
+                                <span class="badge badge-emerald" style="font-size: 0.7rem;">Bot API</span>
+                            </div>
+                        </div>
+                        <p class="webhook-card-desc">BotFather'dan aldığınız <code>TELEGRAM_BOT_TOKEN</code> ve grubunuzun <code>TELEGRAM_CHAT_ID</code> bilgisiyle Markdown bildirimleri alın.</p>
+                    </div>
+
+                    <!-- Slack -->
+                    <div class="webhook-card">
+                        <div class="webhook-card-header">
+                            <div class="webhook-card-icon" style="background: rgba(74, 21, 75, 0.2); color: #E01E5A;">💼</div>
+                            <div>
+                                <h4 class="webhook-card-title">Slack</h4>
+                                <span class="badge badge-amber" style="font-size: 0.7rem;">Incoming Webhook</span>
+                            </div>
+                        </div>
+                        <p class="webhook-card-desc">Slack çalışma alanınızda Incoming Webhook oluşturarak ekibinize anlık paket yayın duyuruları gönderin.</p>
+                    </div>
+                </div>
+
+                <!-- Test Kutusu -->
+                <div class="webhook-test-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h4 style="color: #fff; font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">Webhook Canlı Testi</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem;">Yapılandırılmış kanallara örnek test paketi bildirimi gönderin.</p>
+                        </div>
+                        <button class="btn btn-primary" id="btnSendWebhookTest">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                            <span>Test Bildirimi Gönder</span>
+                        </button>
+                    </div>
+                    <pre class="webhook-output-console" id="webhookConsoleOutput" style="display: none;"></pre>
+                </div>
+
+                <div style="margin-top: 1.5rem; background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-color); border-radius: 10px; padding: 1rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary);">
+                    💡 <strong>Ayar Dosyası:</strong> <code>.webhook.env</code> dosyasını (örnek: <code>.webhook.env.example</code>) proje ana dizinine yerleştirip URL ve jetonlarınızı girmeniz yeterlidir.
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Paket Detay Modalı -->
     <div class="modal-overlay" id="packageModal">
-        <div class="modal-dialog">
+        <div class="modal-dialog" style="max-width: 720px;">
             <div class="modal-header">
                 <div class="modal-title-group">
                     <h3 class="modal-title" id="modalPkgName">Paket Adı</h3>
@@ -327,6 +448,27 @@
             <div class="modal-body" id="modalPkgBody">
                 <!-- Dinamik detaylar buraya gelir -->
             </div>
+
+            <!-- Bağımlılık Ağacı Görselleştirici -->
+            <div class="dep-tree-container" id="modalDepContainer" style="padding: 0 1.5rem 1.5rem 1.5rem;">
+                <div class="dep-tree-header">
+                    <h4 class="dep-tree-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        <span>Paket Bağımlılık Ağacı</span>
+                    </h4>
+                    <span class="badge badge-emerald" id="modalDepSummary">0 Bağımlılık</span>
+                </div>
+                <div id="modalDepTreeContent">
+                    <!-- Bağımlılık nodeları dinamik yüklenir -->
+                </div>
+            </div>
+
             <div class="modal-footer">
                 <a href="#" class="btn btn-primary" id="modalDownloadBtn" download>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

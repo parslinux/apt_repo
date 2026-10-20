@@ -18,3 +18,5 @@ __pycache__/
 .aptly/
 secring.gpg
 pubring.gpg
+.webhook.env
+

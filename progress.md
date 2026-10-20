@@ -60,7 +60,24 @@ Bu belge, APT Depo Yönetim Projesi'nin mevcut durumunu, tamamlanan adımların�
 
 ---
 
+## 🚀 Yeni Eklenen Gelişmiş Özellikler (v1.1)
+
+- [x] **🕸️ Paket Bağımlılık Ağacı Görselleştirici (Dependency Visualizer):**
+  - Web panelinde her paketin `Depends`, `Pre-Depends`, `Recommends`, `Suggests` ve `Conflicts` ilişkileri interaktif kartlar halinde görselleştirildi.
+  - Bağımlılıkların depoda mevcut olup olmadığını (`✓ Depoda Mevcut` vs `Debian Tabanı`) anında tespit eden akıllı kontrol ve tıklanabilir paket geçişleri eklendi.
+- [x] **📢 Discord, Telegram ve Slack Webhook Bildirim Sistemi:**
+  - `scripts/notify_webhook.sh` betiği eklendi.
+  - Yeni `.deb` yüklendiğinde otomatik Discord Embed, Telegram Markdown ve Slack blok bildirimleri gönderimi sağlandı.
+  - Web panelinde canlı webhook test arayüzü ve durum denetleyicisi eklendi.
+  - `manage.sh` kontrol paneline interaktif webhook test seçeneği (15) eklendi.
+- [x] **🔑 GPG Genel Anahtar Dağıtımı ve Debian Standartlarında Doğrulama:**
+  - Web arayüzü üzerinden tek tıkla `parslinux-archive-keyring.gpg` indirme olanağı.
+  - Modern Debian/Ubuntu standartlarına uygun `/etc/apt/keyrings/` dizini ve `signed-by` komut üreticisi eklendi.
+
+---
+
 ## 🔮 Gelecek İyileştirmeler (Genişletme Fikirleri)
 
-- [ ] **Paket Bağımlılık Ağacı Görselleştirici:** Web panelinde bir pakete tıklandığında Depends/Recommends ilişkilerini interaktif grafik olarak çizme.
-- [ ] **Slack / Discord Webhook Bildirimleri:** Depoya yeni paket yüklendiğinde kanala otomatik duyuru mesajı atma.
+- [ ] **Paket İndirme İstatistikleri & Metrikler:** Nginx/Caddy logları üzerinden hangi paketin kaç kez indirildiğini gösteren analitik sekmesi.
+- [ ] **GPG Web Anahtar Sunucusu (WKD - Web Key Directory):** İstemcilerin anahtarı otomatik doğrulayabilmesi için WKD protokol desteği.
+

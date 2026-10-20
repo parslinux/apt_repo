@@ -48,3 +48,15 @@ echo -e "${GREEN}[BAŞARILI] Paket(ler) depoya eklendi.${NC}"
 echo ""
 echo -e "Depodaki güncel paketler:"
 "$APTLY" repo show -with-packages "$REPO_NAME"
+
+# Webhook Bildirimi (Yapılandırılmışsa)
+if [ -f "$PKG_PATH" ] && [[ "$PKG_PATH" == *.deb ]]; then
+    P_NAME=$(dpkg-deb -f "$PKG_PATH" Package 2>/dev/null || basename "$PKG_PATH" .deb)
+    P_VER=$(dpkg-deb -f "$PKG_PATH" Version 2>/dev/null || echo "1.0.0")
+    P_ARCH=$(dpkg-deb -f "$PKG_PATH" Architecture 2>/dev/null || echo "amd64")
+    P_DESC=$(dpkg-deb -f "$PKG_PATH" Description 2>/dev/null | head -n 1 || echo "Paket eklendi.")
+    
+    if [ -x "$ROOT_DIR/scripts/notify_webhook.sh" ]; then
+        "$ROOT_DIR/scripts/notify_webhook.sh" "$P_NAME" "$P_VER" "$P_ARCH" "$REPO_NAME" "$P_DESC" || true
+    fi
+fi

@@ -44,6 +44,7 @@ show_menu() {
     echo -e "  ${YELLOW}12)${NC}🔄 İnternetten Araçları Güncelle (update_apt_tools.sh)"
     echo -e "  ${MAGENTA}13)${NC}🐳 Docker Container Olarak Başlat (run_container.sh)"
     echo -e "  ${MAGENTA}14)${NC}🛑 Docker Container'ı Durdur (stop_container.sh)"
+    echo -e "  ${BLUE}15)${NC} 📢 Webhook Bildirim Testi & Ayarları (notify_webhook.sh)"
     echo ""
     echo -e "  ${RED}0)${NC} ❌ Çıkış"
     echo -e "${BLUE}================================================================${NC}"
@@ -57,7 +58,7 @@ pause() {
 
 while true; do
     show_menu
-    echo -ne "Lütfen bir işlem seçin [0-14]: "
+    echo -ne "Lütfen bir işlem seçin [0-15]: "
     read -r SECIM
 
     case "$SECIM" in
@@ -170,12 +171,18 @@ while true; do
             "$ROOT_DIR/docker/stop_container.sh"
             pause
             ;;
+        15)
+            clear
+            echo -e "${BLUE}=== Webhook Bildirim Testi & Yapılandırması ===${NC}"
+            "$ROOT_DIR/scripts/notify_webhook.sh" --test
+            pause
+            ;;
         0|q|Q)
             echo -e "\n${GREEN}Görüşmek üzere!${NC}"
             exit 0
             ;;
         *)
-            echo -e "${RED}Geçersiz seçim! Lütfen 0 ile 14 arasında bir sayı girin.${NC}"
+            echo -e "${RED}Geçersiz seçim! Lütfen 0 ile 15 arasında bir sayı girin.${NC}"
             sleep 1
             ;;
     esac

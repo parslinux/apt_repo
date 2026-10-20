@@ -35,10 +35,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Dinamik Host ve URL Tespiti (Sources.list için)
     function updateSetupCommands() {
         const origin = window.location.origin || 'http://localhost:8080';
+        
+        const codeGpgKeyImport = document.getElementById('codeGpgKeyImport');
+        if (codeGpgKeyImport) {
+            codeGpgKeyImport.textContent = `sudo mkdir -p /etc/apt/keyrings && curl -fsSL ${origin}/public.key | sudo gpg --dearmor --yes -o /etc/apt/keyrings/parslinux-archive-keyring.gpg`;
+        }
+
+        const codeSourcesGpgLine = document.getElementById('codeSourcesGpgLine');
+        if (codeSourcesGpgLine) {
+            codeSourcesGpgLine.textContent = `echo "deb [signed-by=/etc/apt/keyrings/parslinux-archive-keyring.gpg] ${origin}/ bookworm main" | sudo tee /etc/apt/sources.list.d/parslinux.list`;
+        }
+
         const codeSourcesLine = document.getElementById('codeSourcesLine');
         if (codeSourcesLine) {
-            codeSourcesLine.textContent = `echo "deb [trusted=yes] ${origin}/ bookworm main" | sudo tee /etc/apt/sources.list.d/ozel-depo.list`;
+            codeSourcesLine.textContent = `echo "deb [trusted=yes] ${origin}/ bookworm main" | sudo tee /etc/apt/sources.list.d/parslinux.list`;
         }
+
         const codeOneLineInstall = document.getElementById('codeOneLineInstall');
         if (codeOneLineInstall) {
             codeOneLineInstall.textContent = `curl -sSL ${origin}/install.sh | sudo bash`;
@@ -98,7 +110,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         size: '53080',
                         maintainer: 'Santiago Vila <sanvila@debian.org>',
                         description: 'Klasik GNU hello dünya programı. Terminal ekranına dostça bir selamlama mesajı basar.',
-                        filename: 'pool/main/h/hello/hello_2.10-3_amd64.deb'
+                        filename: 'pool/main/h/hello/hello_2.10-3_amd64.deb',
+                        depends: 'libc6 (>= 2.34)',
+                        recommends: 'bash, coreutils',
+                        suggests: 'hello-doc'
                     }
                 ];
             }
@@ -325,7 +340,89 @@ document.addEventListener('DOMContentLoaded', () => {
             modalDownloadBtn.style.display = 'none';
         }
 
+        // Bağımlılık Ağacı Görselleştiriciyi Çalıştır
+        renderDependencyVisualizer(pkg);
+
         packageModal.classList.add('active');
+    }
+
+    function renderDependencyVisualizer(pkg) {
+        const container = document.getElementById('modalDepTreeContent');
+        const summaryBadge = document.getElementById('modalDepSummary');
+        if (!container) return;
+
+        const depCategories = [
+            { key: 'depends', title: 'Zorunlu Bağımlılıklar (Depends)', class: 'group-depends', badge: 'Zorunlu', color: '#ef4444' },
+            { key: 'pre_depends', title: 'Ön-Kurulum (Pre-Depends)', class: 'group-pre_depends', badge: 'Pre-Depends', color: '#f59e0b' },
+            { key: 'recommends', title: 'Tavsiye Edilenler (Recommends)', class: 'group-recommends', badge: 'Tavsiye', color: '#10b981' },
+            { key: 'suggests', title: 'Önerilenler (Suggests)', class: 'group-suggests', badge: 'Öneri', color: '#06b6d4' },
+            { key: 'conflicts', title: 'Çakışmalar (Conflicts/Breaks)', class: 'group-conflicts', badge: 'Çakışma', color: '#9333ea' }
+        ];
+
+        let totalDepsCount = 0;
+        let htmlBlocks = [];
+
+        depCategories.forEach(cat => {
+            const raw = pkg[cat.key];
+            if (!raw) return;
+
+            const items = raw.split(',').map(s => s.trim()).filter(Boolean);
+            if (items.length === 0) return;
+
+            totalDepsCount += items.length;
+
+            const nodesHtml = items.map(item => {
+                const baseName = item.split(/[ (|]/)[0].trim();
+                const inRepo = allPackages.some(p => p.name === baseName);
+
+                return `
+                    <div class="dep-node-card ${inRepo ? 'clickable' : ''}" data-pkg-name="${escapeHtml(baseName)}" title="${inRepo ? 'Bu paket depomuzda mevcut! Tıklayarak inceleyin.' : 'Debian / Ubuntu taban deposundan sağlanır.'}">
+                        <span style="font-weight: 600;">${escapeHtml(item)}</span>
+                        ${inRepo 
+                            ? '<span class="dep-status-tag in-repo">✓ Depoda Mevcut</span>' 
+                            : '<span class="dep-status-tag system-base">Debian Tabanı</span>'}
+                    </div>
+                `;
+            }).join('');
+
+            htmlBlocks.push(`
+                <div class="dep-group ${cat.class}">
+                    <div class="dep-group-header">
+                        <span class="dep-group-title" style="color: ${cat.color};">
+                            ${cat.title}
+                        </span>
+                        <span class="badge" style="background: rgba(255,255,255,0.06); color: #fff; font-size: 0.72rem;">${items.length} adet</span>
+                    </div>
+                    <div class="dep-nodes-list">
+                        ${nodesHtml}
+                    </div>
+                </div>
+            `);
+        });
+
+        if (totalDepsCount === 0) {
+            summaryBadge.textContent = 'Bağımsız (Self-Contained)';
+            summaryBadge.className = 'badge badge-emerald';
+            container.innerHTML = `
+                <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color); border-radius: 10px; padding: 1.25rem; text-align: center; color: var(--text-secondary); font-size: 0.88rem;">
+                    🛡️ Bu paketin harici bir paket bağımlılığı bulunmuyor veya tek başına çalışabilir.
+                </div>
+            `;
+        } else {
+            summaryBadge.textContent = `${totalDepsCount} Bağımlılık Tanımlı`;
+            summaryBadge.className = 'badge badge-primary';
+            container.innerHTML = htmlBlocks.join('');
+
+            container.querySelectorAll('.dep-node-card.clickable').forEach(node => {
+                node.addEventListener('click', () => {
+                    const targetName = node.getAttribute('data-pkg-name');
+                    const found = allPackages.find(p => p.name === targetName);
+                    if (found) {
+                        openPackageModal(found);
+                    }
+                });
+            });
+        }
     }
 
     function closePackageModal() {
@@ -511,7 +608,75 @@ document.addEventListener('DOMContentLoaded', () => {
         return (b / (1024 * 1024)).toFixed(2) + ' MB';
     }
 
+    // 9. Webhook Durumu ve Testi
+    async function loadWebhookStatus() {
+        const indicator = document.getElementById('webhookStatusIndicator');
+        if (!indicator) return;
+
+        try {
+            const res = await fetch('/api/webhook/status');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.configured) {
+                    indicator.textContent = '✅ Yapılandırıldı (.webhook.env)';
+                    indicator.className = 'badge badge-emerald';
+                } else {
+                    indicator.textContent = '⚠️ Yapılandırılmadı (.webhook.env)';
+                    indicator.className = 'badge badge-amber';
+                }
+            }
+        } catch {
+            indicator.textContent = 'Durum Alınamadı';
+            indicator.className = 'badge badge-secondary';
+        }
+    }
+
+    const btnSendWebhookTest = document.getElementById('btnSendWebhookTest');
+    const webhookConsoleOutput = document.getElementById('webhookConsoleOutput');
+
+    if (btnSendWebhookTest) {
+        btnSendWebhookTest.addEventListener('click', async () => {
+            btnSendWebhookTest.disabled = true;
+            btnSendWebhookTest.innerHTML = '<span>Gönderiliyor...</span>';
+            if (webhookConsoleOutput) {
+                webhookConsoleOutput.style.display = 'block';
+                webhookConsoleOutput.textContent = '>>> Webhook test işlemi başlatılıyor...\n';
+            }
+
+            try {
+                const res = await fetch('/api/webhook/test', { method: 'POST' });
+                const data = await res.json();
+                if (webhookConsoleOutput) {
+                    webhookConsoleOutput.textContent += (data.output || 'Çıktı alınamadı.') + '\n';
+                    if (data.success) {
+                        webhookConsoleOutput.textContent += '>>> [BAŞARILI] Webhook bildirimi başarıyla iletildi.';
+                        showToast('Webhook bildirimi başarıyla iletildi!');
+                    } else {
+                        webhookConsoleOutput.textContent += '>>> [UYARI] Webhook kanalları yapılandırılmamış veya hata döndü.\nLütfen .webhook.env dosyasını kontrol edin.';
+                        showToast('Webhook: .webhook.env dosyasını kontrol edin.');
+                    }
+                }
+            } catch (err) {
+                if (webhookConsoleOutput) {
+                    webhookConsoleOutput.textContent += '>>> [HATA] İstek gönderilirken hata: ' + err.message;
+                }
+                showToast('Webhook sunucu bağlantı hatası!');
+            } finally {
+                btnSendWebhookTest.disabled = false;
+                btnSendWebhookTest.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    <span>Test Bildirimi Gönder</span>
+                `;
+            }
+        });
+    }
+
     // Başlat
     updateSetupCommands();
     loadDashboardData();
+    loadWebhookStatus();
 });
+

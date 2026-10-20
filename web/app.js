@@ -482,6 +482,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Veriler güncellendi');
                 btnRefresh.classList.remove('loading');
             });
+        });
+    }
+
     // 10. Paket Yükleme (Drag & Drop ve File Input)
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');

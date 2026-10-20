@@ -320,6 +320,15 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
             return self.serve_file(WEB_DIR / "index.css", "text/css; charset=utf-8")
         elif path == "/app.js":
             return self.serve_file(WEB_DIR / "app.js", "application/javascript; charset=utf-8")
+        elif path == "/favicon.ico":
+            svg_icon = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
+            self.send_response(200)
+            self.send_header("Content-Type", "image/svg+xml")
+            self.send_header("Content-Length", str(len(svg_icon)))
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(svg_icon)
+            return
 
         # 3. APT Depo Dosyaları (dists/ ve pool/)
         # ~/.aptly/public altında aranır

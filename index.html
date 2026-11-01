@@ -108,19 +108,30 @@
             background: #060911;
             border: 1px solid #1e293b;
             border-radius: 0.75rem;
-            padding: 1.25rem;
+            padding: 1.25rem 6.5rem 1.25rem 1.25rem;
             position: relative;
             margin-top: 1rem;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: #38bdf8;
             overflow-x: auto;
+            max-width: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.4) transparent;
+        }
+
+        .code-block code {
+            display: block;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            line-height: 1.6;
         }
 
         .copy-btn {
             position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
+            top: 0.85rem;
+            right: 0.85rem;
             background: #1e293b;
             border: 1px solid #334155;
             color: var(--text-main);
@@ -129,11 +140,22 @@
             font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            z-index: 2;
         }
 
         .copy-btn:hover {
             background: var(--primary);
             border-color: var(--primary);
+        }
+
+        @media (max-width: 640px) {
+            .code-block {
+                padding: 3rem 1rem 1rem 1rem;
+            }
+            .copy-btn {
+                top: 0.6rem;
+                right: 0.6rem;
+            }
         }
 
         .toolbar {

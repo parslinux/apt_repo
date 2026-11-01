@@ -350,13 +350,55 @@ sudo apt update</code>
             </div>
         </section>
 
-        <div class="toolbar">
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" id="search" placeholder="Paket ara (örn: pars-setup, mycomputer)..." onkeyup="filterPackages()">
+        <!-- Hızlı Özet KPI Kartları -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: var(--surface); border: 1px solid var(--surface-border); border-radius: 0.75rem; padding: 1.1rem 1.25rem;">
+                <div style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">Dağıtım Tabanı</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">Debian 12 Bookworm</div>
+                <div style="font-size: 0.75rem; color: #38bdf8; margin-top: 0.2rem;">0.1 & bookworm sürümleri</div>
             </div>
-            <div class="stats-badge">
-                Toplam <b id="pkg-count">31</b> Paket Mevcut
+            <div style="background: var(--surface); border: 1px solid var(--surface-border); border-radius: 0.75rem; padding: 1.1rem 1.25rem;">
+                <div style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">Mevcut Paketler</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">31 Resmi Paket</div>
+                <div style="font-size: 0.75rem; color: #10b981; margin-top: 0.2rem;">Çekirdek + Masaüstü + Araçlar</div>
+            </div>
+            <div style="background: var(--surface); border: 1px solid var(--surface-border); border-radius: 0.75rem; padding: 1.1rem 1.25rem;">
+                <div style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">GPG Doğrulama (WKD)</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: #6ee7b7; margin-top: 0.25rem;">RFC 9580 Aktif</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">repo@parslinux.org</div>
+            </div>
+            <div style="background: var(--surface); border: 1px solid var(--surface-border); border-radius: 0.75rem; padding: 1.1rem 1.25rem;">
+                <div style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">Desteklenen Mimariler</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 0.25rem;">all • amd64</div>
+                <div style="font-size: 0.75rem; color: #a855f7; margin-top: 0.2rem;">64-bit ve Mimari Bağımsız</div>
+            </div>
+        </div>
+
+        <div class="toolbar" style="display: flex; flex-direction: column; gap: 1rem; align-items: stretch; background: var(--surface); border: 1px solid var(--surface-border); border-radius: 1rem; padding: 1.25rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div class="search-box" style="flex: 1; min-width: 260px; position: relative;">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="search" placeholder="Paket ara (örn: pars-setup, mycomputer)..." onkeyup="filterPackages()" style="padding-right: 2.4rem;">
+                    <button type="button" id="search-clear" onclick="clearSearch()" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 22px; height: 22px; color: #94a3b8; cursor: pointer; font-size: 12px;">✕</button>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <select id="sort-select" onchange="filterPackages()" style="background: #060911; border: 1px solid #1e293b; color: var(--text-main); padding: 0.8rem 1.2rem; border-radius: 0.75rem; outline: none; cursor: pointer; font-size: 0.9rem;">
+                        <option value="name-asc">Sırala: İsim (A-Z)</option>
+                        <option value="name-desc">Sırala: İsim (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                    <span style="font-size: 0.82rem; color: var(--text-muted); margin-right: 0.25rem;">Mimari:</span>
+                    <button type="button" class="arch-filter-btn" id="arch-all" onclick="setArchFilter('all')" style="background: var(--primary); border: 1px solid var(--primary); color: #fff; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">Tümü</button>
+                    <button type="button" class="arch-filter-btn" id="arch-all-only" onclick="setArchFilter('all-only')" style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); color: var(--text-muted); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">all</button>
+                    <button type="button" class="arch-filter-btn" id="arch-amd64" onclick="setArchFilter('amd64')" style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); color: var(--text-muted); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">amd64</button>
+                </div>
+                <div class="stats-badge" style="padding: 0.35rem 0.85rem;">
+                    Toplam <b id="pkg-count">31</b> Paket Listeleniyor
+                </div>
             </div>
         </div>
 
@@ -891,21 +933,85 @@ sudo apt update`
             });
         }
 
+        let activeArchFilter = 'all';
+
+        function setArchFilter(arch) {
+            activeArchFilter = arch;
+            ['all', 'all-only', 'amd64'].forEach(a => {
+                const btn = document.getElementById('arch-' + a);
+                if (btn) {
+                    if (a === arch) {
+                        btn.style.background = 'var(--primary)';
+                        btn.style.borderColor = 'var(--primary)';
+                        btn.style.color = '#fff';
+                    } else {
+                        btn.style.background = 'rgba(255,255,255,0.05)';
+                        btn.style.borderColor = 'var(--surface-border)';
+                        btn.style.color = 'var(--text-muted)';
+                    }
+                }
+            });
+            filterPackages();
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('search');
+            if (input) {
+                input.value = '';
+                filterPackages();
+                input.focus();
+            }
+        }
+
         function filterPackages() {
-            const query = document.getElementById('search').value.toLowerCase();
-            const cards = document.querySelectorAll('.pkg-card');
-            let count = 0;
+            const searchInput = document.getElementById('search');
+            const clearBtn = document.getElementById('search-clear');
+            const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+            if (clearBtn) {
+                clearBtn.style.display = query ? 'block' : 'none';
+            }
+
+            const sortVal = document.getElementById('sort-select') ? document.getElementById('sort-select').value : 'name-asc';
+            const grid = document.getElementById('pkg-grid');
+            const cards = Array.from(document.querySelectorAll('.pkg-card'));
+            
+            let visibleCount = 0;
+
             cards.forEach(card => {
-                const name = card.getAttribute('data-name');
-                const desc = card.getAttribute('data-desc');
-                if (name.includes(query) || desc.includes(query)) {
+                const name = (card.getAttribute('data-name') || '').toLowerCase();
+                const desc = (card.getAttribute('data-desc') || '').toLowerCase();
+                const metaText = (card.querySelector('.pkg-meta') ? card.querySelector('.pkg-meta').innerText : '').toLowerCase();
+                
+                const matchesSearch = !query || name.includes(query) || desc.includes(query);
+
+                let matchesArch = true;
+                if (activeArchFilter === 'all-only') {
+                    matchesArch = metaText.includes('mimari: all') || metaText.includes('all');
+                } else if (activeArchFilter === 'amd64') {
+                    matchesArch = metaText.includes('amd64');
+                }
+
+                if (matchesSearch && matchesArch) {
                     card.style.display = 'flex';
-                    count++;
+                    visibleCount++;
                 } else {
                     card.style.display = 'none';
                 }
             });
-            document.getElementById('pkg-count').innerText = count;
+
+            // Sıralama
+            cards.sort((a, b) => {
+                const nameA = (a.getAttribute('data-name') || '').toLowerCase();
+                const nameB = (b.getAttribute('data-name') || '').toLowerCase();
+                return sortVal === 'name-desc' ? nameB.localeCompare(nameA) : nameA.localeCompare(nameB);
+            });
+
+            if (grid) {
+                cards.forEach(card => grid.appendChild(card));
+            }
+
+            const countEl = document.getElementById('pkg-count');
+            if (countEl) countEl.innerText = visibleCount;
         }
     </script>
 </body>

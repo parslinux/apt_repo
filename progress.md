@@ -128,6 +128,10 @@ Bu belge, APT Depo Yönetim Projesi'nin mevcut durumunu, tamamlanan adımların�
   - Paket içi dosya ağacı farklarını (Eklenen `+`, Silinen `-`, Değişen `!`) izinler ve dosya boyutlarıyla listeleyen saf Python arşiv karşılaştırıcı (`/api/package/diff`).
   - İki Aptly snapshot'ı arasındaki paket değişikliklerini analiz eden tablo motoru (`/api/snapshot/diff`).
   - Web paneline **"Diff Karşılaştırıcı"** sekmesi: Paketler arası ve Snapshot'lar arası geçişli çift modlu modern arayüz.
+- [x] **📦 Paket Kartı Eylemleri (.deb İndir & Detaylar Entegrasyonu):**
+  - Hem yerel kontrol panelinde (`http://localhost:8080`) hem de canlı GitHub Pages portalında tüm paket kartlarına doğrudan **`.deb İndir`** ve **`Detaylar`** butonları eklendi.
+  - Canlı GitHub Pages portalına paket detay modalı (kurulum komutu, tek tıkla kopyalama, sürüm & mimari rozetleri, doğrudan indirme) entegre edildi.
+  - Değişiklikler derlenip `main` ve `gh-pages` dallarına pushlandı.
 
 ---
 

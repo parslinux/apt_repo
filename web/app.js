@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allPackages = [];
     let allRepos = [];
     let currentTab = 'packagesTab';
+    let downloadMetrics = { total_downloads: 0, total_bytes: 0, top_packages: [], recent_events: [] };
 
     // DOM Elementleri
     const packagesGrid = document.getElementById('packagesGrid');
@@ -23,6 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const statPublishCount = document.getElementById('statPublishCount');
     const statDiskUsage = document.getElementById('statDiskUsage');
     
+    // Metrik Elementleri
+    const metricTotalDownloads = document.getElementById('metricTotalDownloads');
+    const metricTotalBandwidth = document.getElementById('metricTotalBandwidth');
+    const metricTopPackage = document.getElementById('metricTopPackage');
+    const metricTopPackageCount = document.getElementById('metricTopPackageCount');
+    const metricLastDownload = document.getElementById('metricLastDownload');
+    const metricLastPackage = document.getElementById('metricLastPackage');
+    const metricTrackedPkgsBadge = document.getElementById('metricTrackedPkgsBadge');
+    const metricsTableBody = document.getElementById('metricsTableBody');
+    const metricsFeed = document.getElementById('metricsFeed');
+    const btnSimulateDownload = document.getElementById('btnSimulateDownload');
+    const btnRefreshMetrics = document.getElementById('btnRefreshMetrics');
+    const btnResetMetrics = document.getElementById('btnResetMetrics');
+
     // Modal Elementleri
     const packageModal = document.getElementById('packageModal');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
@@ -71,6 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetContent) targetContent.classList.add('active');
 
             currentTab = targetTab;
+            if (targetTab === 'metricsTab') {
+                loadMetricsData();
+            }
         });
     });
 
@@ -199,7 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        packagesGrid.innerHTML = filtered.map(pkg => `
+        packagesGrid.innerHTML = filtered.map(pkg => {
+            const pm = (downloadMetrics.top_packages || []).find(p => p.name === pkg.name);
+            const dlBadge = (pm && pm.downloads > 0) ? `<span>•</span><span style="color: #38bdf8; font-weight: 600;" title="${pm.downloads} kez indirildi">📥 ${pm.downloads}</span>` : '';
+            return `
             <div class="package-card" data-pkg="${encodeURIComponent(JSON.stringify(pkg))}">
                 <div>
                     <div class="package-header">
@@ -216,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>${formatBytes(pkg.size)}</span>
                         <span>•</span>
                         <span>${escapeHtml(pkg.repo || 'main')}</span>
+                        ${dlBadge}
                     </div>
 
                     <div class="package-actions">
@@ -233,7 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         // Kart içi buton dinleyicileri
         packagesGrid.querySelectorAll('.btn-install').forEach(btn => {
@@ -302,6 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
         modalPkgName.textContent = pkg.name;
         modalPkgVersion.textContent = `v${pkg.version}`;
         
+        const pm = (downloadMetrics.top_packages || []).find(p => p.name === pkg.name);
+        const dlCount = pm ? pm.downloads : 0;
+        const dlBytes = pm ? formatBytes(pm.bytes) : '0 B';
+
         modalPkgBody.innerHTML = `
             <div class="modal-detail-row">
                 <span class="modal-detail-label">Paket:</span>
@@ -318,6 +345,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="modal-detail-row">
                 <span class="modal-detail-label">Dosya Boyutu:</span>
                 <span class="modal-detail-val">${formatBytes(pkg.size)}</span>
+            </div>
+            <div class="modal-detail-row">
+                <span class="modal-detail-label">Toplam İndirme:</span>
+                <span class="modal-detail-val" style="color: #38bdf8; font-weight: 600;">📥 ${dlCount} indirme (${dlBytes})</span>
             </div>
             <div class="modal-detail-row">
                 <span class="modal-detail-label">Geliştirici / Bakımcı:</span>
@@ -677,9 +708,205 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 12. İndirme Analitiği ve Metrikleri Yükleme
+    async function loadMetricsData() {
+        try {
+            const res = await fetch('/api/metrics').catch(() => null);
+            if (!res || !res.ok) return;
+
+            const data = await res.json();
+            downloadMetrics = data;
+
+            // 1. KPI Kartları
+            if (metricTotalDownloads) {
+                metricTotalDownloads.textContent = (data.total_downloads || 0).toLocaleString();
+            }
+            if (metricTotalBandwidth) {
+                metricTotalBandwidth.textContent = formatBytes(data.total_bytes || 0);
+            }
+            if (metricTopPackage) {
+                if (data.top_packages && data.top_packages.length > 0) {
+                    const top = data.top_packages[0];
+                    metricTopPackage.textContent = top.name;
+                    metricTopPackageCount.textContent = `${top.downloads} indirme (${formatBytes(top.bytes)})`;
+                } else {
+                    metricTopPackage.textContent = '-';
+                    metricTopPackageCount.textContent = 'Henüz indirme yok';
+                }
+            }
+            if (metricLastDownload) {
+                if (data.recent_events && data.recent_events.length > 0) {
+                    const last = data.recent_events[0];
+                    const timeOnly = last.timestamp.includes(' ') ? last.timestamp.split(' ')[1] : last.timestamp;
+                    metricLastDownload.textContent = timeOnly;
+                    metricLastPackage.textContent = `${last.package} (${last.client})`;
+                } else {
+                    metricLastDownload.textContent = '-';
+                    metricLastPackage.textContent = '-';
+                }
+            }
+            if (metricTrackedPkgsBadge) {
+                const count = (data.top_packages || []).length;
+                metricTrackedPkgsBadge.textContent = `${count} Takip Edilen Paket`;
+            }
+
+            // 2. Liderlik Tablosu
+            if (metricsTableBody) {
+                const topList = data.top_packages || [];
+                if (topList.length === 0) {
+                    metricsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted" style="padding: 2.5rem;">
+                                Henüz kayıtlı paket indirmesi bulunmuyor. Test etmek için aşağıdaki "Test İndirmesi Simüle Et" butonuna tıklayabilirsiniz.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    const totalDl = data.total_downloads || 1;
+                    metricsTableBody.innerHTML = topList.map((p, idx) => {
+                        const rank = idx + 1;
+                        let rankClass = 'rank-other';
+                        if (rank === 1) rankClass = 'rank-1';
+                        else if (rank === 2) rankClass = 'rank-2';
+                        else if (rank === 3) rankClass = 'rank-3';
+
+                        const pct = ((p.downloads / totalDl) * 100).toFixed(1);
+
+                        return `
+                            <tr>
+                                <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+                                <td>
+                                    <strong style="color: #fff; font-family: var(--font-mono); font-size: 0.92rem;">${escapeHtml(p.name)}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary" style="font-size: 0.72rem;">${escapeHtml(p.version || '-')}</span>
+                                </td>
+                                <td>
+                                    <span style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${p.downloads}</span>
+                                </td>
+                                <td class="popularity-cell">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                                        <span>%${pct}</span>
+                                    </div>
+                                    <div class="popularity-bar-container">
+                                        <div class="popularity-bar-fill" style="width: ${pct}%;"></div>
+                                    </div>
+                                </td>
+                                <td style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono);">
+                                    ${formatBytes(p.bytes)}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // 3. Canlı İndirme Günlüğü (Feed)
+            if (metricsFeed) {
+                const events = data.recent_events || [];
+                if (events.length === 0) {
+                    metricsFeed.innerHTML = `
+                        <div class="text-center text-muted" style="padding: 3rem 1rem;">
+                            İstemcilerden (APT, browser, cURL) gelen indirme istekleri burada canlı listelenir.
+                        </div>
+                    `;
+                } else {
+                    metricsFeed.innerHTML = events.map(ev => `
+                        <div class="feed-item">
+                            <div class="feed-left">
+                                <span class="feed-pkg">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #38bdf8;">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    ${escapeHtml(ev.package)}
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: normal;">v${escapeHtml(ev.version)}</span>
+                                </span>
+                                <span class="feed-meta">
+                                    <span>${escapeHtml(ev.timestamp)}</span>
+                                    <span>•</span>
+                                    <span>${escapeHtml(ev.ip)}</span>
+                                    <span>•</span>
+                                    <span>${formatBytes(ev.size)}</span>
+                                </span>
+                            </div>
+                            <span class="feed-client-badge">${escapeHtml(ev.client)}</span>
+                        </div>
+                    `).join('');
+                }
+            }
+        } catch (err) {
+            console.error('Metrik yükleme hatası:', err);
+        }
+    }
+
+    // Buton Dinleyicileri (Metrikler)
+    if (btnRefreshMetrics) {
+        btnRefreshMetrics.addEventListener('click', async () => {
+            btnRefreshMetrics.classList.add('loading');
+            await loadMetricsData();
+            setTimeout(() => btnRefreshMetrics.classList.remove('loading'), 400);
+            showToast('Metrikler güncellendi');
+        });
+    }
+
+    if (btnSimulateDownload) {
+        btnSimulateDownload.addEventListener('click', async () => {
+            btnSimulateDownload.disabled = true;
+            try {
+                // Rastgele bir paket seç
+                const targetPkg = allPackages.length > 0 
+                    ? allPackages[Math.floor(Math.random() * allPackages.length)]
+                    : { name: 'pars-setup', version: '1.0.0', size: 307200 };
+
+                const res = await fetch('/api/metrics/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        package: targetPkg.name,
+                        version: targetPkg.version,
+                        size: parseInt(targetPkg.size) || 153600
+                    })
+                });
+
+                if (res.ok) {
+                    showToast(`'${targetPkg.name}' için indirme simüle edildi!`);
+                    await loadMetricsData();
+                    renderPackages();
+                } else {
+                    showToast('Simülasyon başarısız oldu.');
+                }
+            } catch (err) {
+                showToast('Hata: ' + err.message);
+            } finally {
+                btnSimulateDownload.disabled = false;
+            }
+        });
+    }
+
+    if (btnResetMetrics) {
+        btnResetMetrics.addEventListener('click', async () => {
+            if (!confirm('Tüm indirme sayaçlarını ve log geçmişini sıfırlamak istediğinize emin misiniz?')) {
+                return;
+            }
+            try {
+                const res = await fetch('/api/metrics/reset', { method: 'POST' });
+                if (res.ok) {
+                    showToast('Tüm indirme metrikleri sıfırlandı.');
+                    await loadMetricsData();
+                    renderPackages();
+                }
+            } catch (err) {
+                showToast('Sıfırlama hatası: ' + err.message);
+            }
+        });
+    }
+
     // Başlat
     updateSetupCommands();
     loadDashboardData();
     loadWebhookStatus();
+    loadMetricsData();
 });
 

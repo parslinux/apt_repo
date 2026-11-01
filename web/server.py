@@ -13,11 +13,135 @@ import email
 from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import urllib.parse
+import threading
+from datetime import datetime
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 WEB_DIR = Path(__file__).resolve().parent
 APTLY_BIN = ROOT_DIR / "bin" / "aptly"
 PUBLIC_DIR = Path.home() / ".aptly" / "public"
+METRICS_FILE = ROOT_DIR / ".metrics.json"
+
+class MetricsTracker:
+    _lock = threading.Lock()
+
+    @classmethod
+    def _load_data(cls):
+        if METRICS_FILE.is_file():
+            try:
+                with open(METRICS_FILE, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return {
+            "total_downloads": 0,
+            "total_bytes": 0,
+            "packages": {},
+            "recent_events": [],
+            "daily_trends": {}
+        }
+
+    @classmethod
+    def _save_data(cls, data):
+        try:
+            with open(METRICS_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"[Metrik Kayıt Hatası] {e}", file=sys.stderr)
+
+    @classmethod
+    def record_download(cls, filename, file_size, client_ip="127.0.0.1", user_agent=""):
+        base_name = filename.replace(".deb", "")
+        parts = base_name.split("_")
+        pkg_name = parts[0] if parts else base_name
+        version = parts[1] if len(parts) > 1 else ""
+
+        client_name = "APT İstemcisi"
+        ua_lower = user_agent.lower()
+        if "apt-http" in ua_lower or "debian apt" in ua_lower:
+            client_name = "Debian/Ubuntu APT"
+        elif "curl" in ua_lower:
+            client_name = "cURL Komutu"
+        elif "wget" in ua_lower:
+            client_name = "Wget"
+        elif "mozilla" in ua_lower or "chrome" in ua_lower or "safari" in ua_lower:
+            client_name = "Web Tarayıcısı"
+        elif user_agent:
+            client_name = user_agent[:30]
+
+        now_iso = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        with cls._lock:
+            data = cls._load_data()
+            data["total_downloads"] = data.get("total_downloads", 0) + 1
+            data["total_bytes"] = data.get("total_bytes", 0) + file_size
+
+            pkgs = data.setdefault("packages", {})
+            pkg_info = pkgs.setdefault(pkg_name, {
+                "downloads": 0,
+                "bytes": 0,
+                "version": version,
+                "last_download": None
+            })
+            pkg_info["downloads"] += 1
+            pkg_info["bytes"] += file_size
+            if version:
+                pkg_info["version"] = version
+            pkg_info["last_download"] = now_iso
+
+            trends = data.setdefault("daily_trends", {})
+            trends[today] = trends.get(today, 0) + 1
+
+            recent = data.setdefault("recent_events", [])
+            recent.insert(0, {
+                "timestamp": now_iso,
+                "package": pkg_name,
+                "version": version or "-",
+                "filename": filename,
+                "size": file_size,
+                "ip": client_ip,
+                "client": client_name
+            })
+            data["recent_events"] = recent[:40]
+
+            cls._save_data(data)
+
+    @classmethod
+    def get_summary(cls):
+        with cls._lock:
+            data = cls._load_data()
+        
+        pkgs_list = []
+        for name, info in data.get("packages", {}).items():
+            pkgs_list.append({
+                "name": name,
+                "version": info.get("version", "-"),
+                "downloads": info.get("downloads", 0),
+                "bytes": info.get("bytes", 0),
+                "last_download": info.get("last_download")
+            })
+        pkgs_list.sort(key=lambda x: x["downloads"], reverse=True)
+
+        return {
+            "total_downloads": data.get("total_downloads", 0),
+            "total_bytes": data.get("total_bytes", 0),
+            "unique_packages": len(pkgs_list),
+            "top_packages": pkgs_list,
+            "recent_events": data.get("recent_events", []),
+            "daily_trends": data.get("daily_trends", {})
+        }
+
+    @classmethod
+    def reset(cls):
+        with cls._lock:
+            cls._save_data({
+                "total_downloads": 0,
+                "total_bytes": 0,
+                "packages": {},
+                "recent_events": [],
+                "daily_trends": {}
+            })
 
 def run_cmd(args):
     try:
@@ -223,6 +347,24 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
                 })
             return self.send_json_response({"success": False, "error": "notify_webhook.sh betiği bulunamadı."}, 404)
 
+        elif parsed.path == "/api/metrics/reset":
+            MetricsTracker.reset()
+            return self.send_json_response({"success": True, "message": "İndirme metrikleri sıfırlandı."})
+
+        elif parsed.path == "/api/metrics/simulate":
+            try:
+                content_length = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(content_length).decode("utf-8")) if content_length > 0 else {}
+            except Exception:
+                body = {}
+            pkg_name = body.get("package", "pars-setup")
+            version = body.get("version", "1.0.0")
+            fname = f"{pkg_name}_{version}_all.deb"
+            fsize = int(body.get("size", 1024 * 300))
+            client_ip = self.client_address[0] if self.client_address else "127.0.0.1"
+            MetricsTracker.record_download(fname, fsize, client_ip, "Simüle İndirme (Test)")
+            return self.send_json_response({"success": True, "message": f"'{pkg_name}' için indirme metriklerine test kaydı eklendi."})
+
         self.send_error(404, "Endpoint bulunamadı")
 
     def do_GET(self):
@@ -230,7 +372,10 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
         path = parsed.path
 
         # 1. API Rotaları
-        if path == "/api/status":
+        if path == "/api/metrics":
+            return self.send_json_response(MetricsTracker.get_summary())
+
+        elif path == "/api/status":
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Access-Control-Allow-Origin", "*")
@@ -339,6 +484,13 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
             content_type = "application/octet-stream"
             if candidate.name.endswith(".deb"):
                 content_type = "application/vnd.debian.binary-package"
+                try:
+                    fsize = candidate.stat().st_size
+                    client_ip = self.client_address[0] if self.client_address else "127.0.0.1"
+                    user_agent = self.headers.get("User-Agent", "")
+                    MetricsTracker.record_download(candidate.name, fsize, client_ip, user_agent)
+                except Exception as me:
+                    print(f"[Metrik Kayıt Hatası] {me}", file=sys.stderr)
             elif candidate.name in ("Release", "Packages"):
                 content_type = "text/plain; charset=utf-8"
             elif candidate.name.endswith(".gz"):

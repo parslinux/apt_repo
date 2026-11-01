@@ -73,11 +73,20 @@ Bu belge, APT Depo Yönetim Projesi'nin mevcut durumunu, tamamlanan adımların�
 - [x] **🔑 GPG Genel Anahtar Dağıtımı ve Debian Standartlarında Doğrulama:**
   - Web arayüzü üzerinden tek tıkla `parslinux-archive-keyring.gpg` indirme olanağı.
   - Modern Debian/Ubuntu standartlarına uygun `/etc/apt/keyrings/` dizini ve `signed-by` komut üreticisi eklendi.
+- [x] **🌐 GitHub Pages Canlı APT Reposu & Çift Dağıtım Desteği:**
+  - `https://parslinux.github.io/apt_repo/` üzerinden 31 paketlik resmi canlı repo yayını (`gh-pages`).
+  - Hem `0.1` hem de `bookworm` dağıtım yolları için Aptly indeksleme ve arama desteği.
+- [x] **📊 Paket İndirme İstatistikleri & Canlı Analitikler:**
+  - `web/server.py` çekirdeğine gerçek zamanlı `.deb` indirme yakalama ve bant genişliği izleme motoru (`MetricsTracker`) eklendi.
+  - `/api/metrics`, `/api/metrics/simulate` ve `/api/metrics/reset` uç noktaları entegre edildi.
+  - Web paneline **"İndirme Analitiği"** sekmesi eklendi: 4 adet KPI özet kartı, En Çok İndirilen Paketler Liderlik Tablosu (yüzdelik çubuklarla), Canlı İndirme Akışı ve test simülatörü.
+  - Paket kartlarına (`📥 X`) ve detay modalına anlık indirme sayacı yerleştirildi.
+  - Nginx, Caddy ve Apache üretim loglarını içeri aktaran `scripts/parse_download_logs.py` aracı eklendi.
 
 ---
 
 ## 🔮 Gelecek İyileştirmeler (Genişletme Fikirleri)
 
-- [ ] **Paket İndirme İstatistikleri & Metrikler:** Nginx/Caddy logları üzerinden hangi paketin kaç kez indirildiğini gösteren analitik sekmesi.
-- [ ] **GPG Web Anahtar Sunucusu (WKD - Web Key Directory):** İstemcilerin anahtarı otomatik doğrulayabilmesi için WKD protokol desteği.
+- [ ] **GPG Web Anahtar Sunucusu (WKD - Web Key Directory):** İstemcilerin anahtarı `gpg --locate-keys` ile otomatik doğrulayabilmesi için `.well-known/openpgpkey/` WKD protokol desteği ve otomasyon betiği.
+- [ ] **Paket İndirme Zaman Serisi Grafiği (Chart.js / SVG):** Günlük/haftalık indirme trendlerini görselleştiren interaktif grafik.
 

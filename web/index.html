@@ -154,6 +154,15 @@
                 </svg>
                 <span>Webhook Bildirimleri</span>
             </button>
+
+            <button class="tab-btn" data-tab="metricsTab" id="tabBtnMetrics">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                <span>İndirme Analitiği</span>
+            </button>
         </nav>
 
         <!-- SEKME 1: PAKET KATALOĞU -->
@@ -431,6 +440,159 @@
 
                 <div style="margin-top: 1.5rem; background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-color); border-radius: 10px; padding: 1rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary);">
                     💡 <strong>Ayar Dosyası:</strong> <code>.webhook.env</code> dosyasını (örnek: <code>.webhook.env.example</code>) proje ana dizinine yerleştirip URL ve jetonlarınızı girmeniz yeterlidir.
+                </div>
+            </div>
+        </div>
+
+        <!-- SEKME 6: İNDİRME ANALİTİĞİ VE METRİKLER -->
+        <div class="tab-content" id="metricsTab">
+            <div class="metrics-container">
+                <!-- Metrik Özet Kartları -->
+                <div class="metrics-kpi-grid">
+                    <div class="metric-kpi-card">
+                        <div class="metric-kpi-icon icon-indigo">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </div>
+                        <div class="metric-kpi-body">
+                            <span class="metric-kpi-label">Toplam İndirme</span>
+                            <h3 class="metric-kpi-val" id="metricTotalDownloads">0</h3>
+                            <span class="metric-kpi-sub">Başarılı .deb istekleri</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-kpi-card">
+                        <div class="metric-kpi-icon icon-cyan">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                <path d="M12 12v9"></path>
+                                <path d="m8 17 4 4 4-4"></path>
+                            </svg>
+                        </div>
+                        <div class="metric-kpi-body">
+                            <span class="metric-kpi-label">Aktarılan Veri</span>
+                            <h3 class="metric-kpi-val" id="metricTotalBandwidth">0 MB</h3>
+                            <span class="metric-kpi-sub">Bant genişliği tüketimi</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-kpi-card">
+                        <div class="metric-kpi-icon icon-emerald">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </div>
+                        <div class="metric-kpi-body">
+                            <span class="metric-kpi-label">En Popüler Paket</span>
+                            <h3 class="metric-kpi-val" id="metricTopPackage" style="font-size: 1.25rem;">-</h3>
+                            <span class="metric-kpi-sub" id="metricTopPackageCount">Henüz indirme yok</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-kpi-card">
+                        <div class="metric-kpi-icon icon-amber">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="metric-kpi-body">
+                            <span class="metric-kpi-label">Son İndirme Zamanı</span>
+                            <h3 class="metric-kpi-val" id="metricLastDownload" style="font-size: 1.1rem;">-</h3>
+                            <span class="metric-kpi-sub" id="metricLastPackage">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detay Grid: Liderlik Tablosu & Canlı İndirme Akışı -->
+                <div class="metrics-grid">
+                    <!-- Sol Panel: En Çok İndirilenler Tablosu -->
+                    <div class="metrics-box">
+                        <div class="metrics-box-header">
+                            <h4 class="metrics-box-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                                    <path d="M4 22h16"></path>
+                                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                                </svg>
+                                <span>Paket İndirme Liderlik Tablosu</span>
+                            </h4>
+                            <span class="badge badge-primary" id="metricTrackedPkgsBadge">0 Takip Edilen Paket</span>
+                        </div>
+
+                        <div class="metrics-table-wrapper">
+                            <table class="metrics-table" id="metricsTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 44px;">#</th>
+                                        <th>Paket Adı</th>
+                                        <th>Sürüm</th>
+                                        <th>İndirmeler</th>
+                                        <th>Oran</th>
+                                        <th>Aktarım</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="metricsTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted" style="padding: 2.5rem;">Henüz kayıtlı paket indirmesi bulunmuyor.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Panel: Canlı İndirme Günlüğü -->
+                    <div class="metrics-box">
+                        <div class="metrics-box-header">
+                            <h4 class="metrics-box-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                                <span>Canlı İndirme Günlüğü</span>
+                            </h4>
+                            <span class="badge badge-emerald" id="metricLiveStatusBadge">Gerçek Zamanlı</span>
+                        </div>
+
+                        <div class="metrics-feed" id="metricsFeed">
+                            <div class="text-center text-muted" style="padding: 3rem 1rem;">
+                                İstemcilerden (APT, browser, cURL) gelen indirme istekleri burada canlı listelenir.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alt Aksiyon Çubuğu -->
+                <div class="metrics-actions-bar">
+                    <div class="metrics-actions-left">
+                        <button class="btn btn-primary btn-sm" id="btnSimulateDownload">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            <span>Test İndirmesi Simüle Et</span>
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="btnRefreshMetrics">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                            </svg>
+                            <span>Yenile</span>
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="btnResetMetrics" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            <span>Sıfırla</span>
+                        </button>
+                    </div>
+                    <div class="metrics-info-hint">
+                        💡 Nginx/Caddy üretim loglarını aktarmak için: <code>./scripts/parse_download_logs.py /var/log/nginx/access.log</code>
+                    </div>
                 </div>
             </div>
         </div>

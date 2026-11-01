@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParsLinux 26.04 LTS (Noble Pars) - Resmi APT Deposu</title>
+    <title>ParsLinux 0.1 - Resmi APT Deposu</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -312,7 +312,7 @@
 <body>
     <div class="container">
         <header>
-            <div class="badge">🐆 ParsLinux 26.04 LTS (Noble Pars)</div>
+            <div class="badge">🐆 ParsLinux 0.1</div>
             <h1>Resmi APT Paket Deposu</h1>
             <p class="subtitle">ParsLinux ekosistemine ait tüm çekirdek masaüstü, kurulum aracı, temalar ve sistem uygulamalarının resmi dağıtım merkezi.</p>
         </header>
@@ -325,7 +325,7 @@
             
             <div class="code-block">
                 <button class="copy-btn" onclick="copyCommand()">Kopyala</button>
-                <code id="setup-cmd">echo "deb [trusted=yes] https://parslinux.github.io/apt_repo bookworm main" | sudo tee /etc/apt/sources.list.d/parslinux.list<br>sudo apt update</code>
+                <code id="setup-cmd">echo "deb [trusted=yes] https://parslinux.github.io/apt_repo 0.1 main" | sudo tee /etc/apt/sources.list.d/parslinux.list<br>sudo apt update</code>
             </div>
         </section>
 
@@ -662,7 +662,7 @@
                         <div class="pkg-name">pars-setup</div>
                         <div class="pkg-version">v26.04.1</div>
                     </div>
-                    <div class="pkg-desc">ParsLinux OS Kurulum Sihirbazı ParsLinux 26.04 LTS ve modern Linux dağıtımları için Libadwaita ve GTK4 tabanlı, Pardus ve Calamares standartlarında işletim sistemi kurulum sihirbazı.</div>
+                    <div class="pkg-desc">ParsLinux OS Kurulum Sihirbazı ParsLinux 0.1 ve modern Linux dağıtımları için Libadwaita ve GTK4 tabanlı, Pardus ve Calamares standartlarında işletim sistemi kurulum sihirbazı.</div>
                 </div>
                 <div class="pkg-meta">
                     <span>Mimari: all • 293.5 KB</span>
@@ -801,7 +801,7 @@
 
     <script>
         function copyCommand() {
-            const cmd = 'echo "deb [trusted=yes] https://parslinux.github.io/apt_repo bookworm main" | sudo tee /etc/apt/sources.list.d/parslinux.list\nsudo apt update';
+            const cmd = 'echo "deb [trusted=yes] https://parslinux.github.io/apt_repo 0.1 main" | sudo tee /etc/apt/sources.list.d/parslinux.list\nsudo apt update';
             navigator.clipboard.writeText(cmd).then(() => {
                 const btn = document.querySelector('.copy-btn');
                 btn.innerText = 'Kopyalandı! ✓';

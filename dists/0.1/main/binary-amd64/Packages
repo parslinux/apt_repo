@@ -1,0 +1,590 @@
+Package: pars-base
+Priority: optional
+Section: metapackages
+Maintainer: Pars Linux Developers <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Replaces: pulseaudio, pulseaudio-module-bluetooth, pardus-common-desktop
+Depends: pars-branding, dbus-user-session, dbus-x11, desktop-base, gvfs, gvfs-backends, gvfs-fuse, xdg-user-dirs, xdg-utils, pipewire, pipewire-audio, pipewire-alsa, pipewire-pulse, wireplumber, libspa-0.2-bluetooth, libspa-0.2-modules, fonts-ubuntu, fonts-noto-core, fonts-noto-color-emoji, fonts-dejavu-core, fonts-liberation2, xorg, xserver-xorg-input-all, xserver-xorg-video-all, network-manager, bluez, wireless-tools, wpasupplicant
+Recommends: alsa-utils, btrfs-progs, command-not-found, curl, dnsutils, dosfstools, eject, f2fs-tools, fastfetch, fonts-font-awesome, fzf, iw, libcanberra-gtk3-module, lz4, net-tools, ntfs-3g, p7zip-full, printer-driver-all, pulseaudio-utils, tree, unzip, webp-pixbuf-loader, xfsprogs, zip
+Conflicts: pulseaudio, pulseaudio-module-bluetooth
+Breaks: pulseaudio, pulseaudio-module-bluetooth, pardus-common-desktop
+Filename: pool/main/p/pars-base/pars-base_1.0.0_all.deb
+Size: 3240
+MD5sum: 3817949ee7c37f08bc92ef8ff808ea1a
+SHA1: 1aa1e97b9d67b20edd27f0b7bd321928ecd90cfe
+SHA256: 9dc0ccf3b8f8525934b264519833d0e646edf7729d61e5af4f3439b2bc22038e
+SHA512: e6fb92542ef277f943d0beedef78d9c6a26b7b66650ae531cf08b52bacb73f7ef32eac40a0e6cdfb22fa4c358a14a2c6d5ee3ebd0f0d2f773ff917183bb3cc05
+Description: Pars Linux Base Metapackage (Core system, Pipewire audio, fonts)
+ This metapackage provides the core foundation of the Pars Linux operating
+ system. It depends on essential system libraries, the modern Pipewire
+ multimedia sound architecture, Turkish-compatible modern fonts, hardware
+ abstraction layers, and the Pars visual branding package.
+ .
+ All desktop environments (pars-desktop-gnome, pars-desktop-xfce) depend
+ directly on this base package.
+
+Package: pars-branding
+Priority: optional
+Section: metapackages
+Maintainer: Pars Linux Developers <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Replaces: pardus-backgrounds
+Depends: ${misc:Depends}, parslinux-gnome-settings | pardus-gnome-settings, parslinux-grub-theme | pardus-bilge-grub-theme, desktop-base
+Recommends: adw-gtk3-theme, fonts-ubuntu, fastfetch, parslinux-about, plymouth, plymouth-themes
+Breaks: pardus-backgrounds
+Filename: pool/main/p/pars-branding/pars-branding_1.0.0_all.deb
+Size: 378694
+MD5sum: 960a926481b6f231482781b0629712dd
+SHA1: a9829154373d918743b801c7e23b37325a9c1609
+SHA256: 8868ec3a8fe9f0e298f1cbb3a3b89bb7f0f6c70ff260ca75eaace6fb5c74d65e
+SHA512: a3c2b7a7556f2530ab8ac0db1c0ee0362fb39014463a53f1f86e5e19d445a22f746d2cd5216b84bc13ef8b6510f340d992a2156f8178768a61ce586717bfd8fa
+Description: ParsLinux Brand Identity, Wallpapers and Theme Metapackage
+ This package provides the official visual identity for ParsLinux:
+  * ParsLinux official wallpapers and GNOME background settings
+  * Vector SVG brand logos and application icons
+  * Fastfetch ASCII artwork and terminal system configuration
+  * Distribution release identity (os-release and issue)
+  * System branding dependencies (GTK themes, icons, grub theme)
+Homepage: https://github.com/parslinux/pars-branding
+
+Package: pars-creator
+Priority: optional
+Section: metapackages
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: pars-creator-gimp (= 1.0.0), pars-creator-inkscape (= 1.0.0)
+Recommends: pars-creator-obs (= 1.0.0), pars-creator-kdenlive (= 1.0.0), pars-creator-audacity (= 1.0.0)
+Filename: pool/main/p/pars-creator/pars-creator_1.0.0_all.deb
+Size: 928
+MD5sum: f4f4747cf84ae6ec3a11798785948afd
+SHA1: 16a128a7e0bca0dc46ce19b9968616af270fac19
+SHA256: cfd926d1ce68ad55c0f9f8ae474ea5806608fe46616dd05f0bb7ebdeaccc3db5
+SHA512: c9fdb045539c3f35529ca1a7e556a5e9f10875db002e4b3cab225800242abdf4e67ba830cad2806cf62ffe5f2f3bccc84744a72d2b4c8d93fa466b1754f6aabf
+Description: Pars Linux İçerik Üretici Meta Paketi (Tüm Creator Rolü)
+ Pars Linux için dijital içerik, grafik, video ve ses prodüksiyon
+ araçlarını (OBS Studio, GIMP, Inkscape, Kdenlive, Audacity) bir araya
+ getiren üst meta pakettir.
+ .
+ Modüler alt bileşenler:
+  - pars-creator-obs
+  - pars-creator-gimp
+  - pars-creator-inkscape
+  - pars-creator-kdenlive
+  - pars-creator-audacity
+
+Package: pars-creator-audacity
+Priority: optional
+Section: sound
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: audacity
+Recommends: ladspa-sdk, ffmpeg
+Filename: pool/main/p/pars-creator-audacity/pars-creator-audacity_1.0.0_all.deb
+Size: 810
+MD5sum: 7f393ea95416dcf12782fcb875386110
+SHA1: 1fb6244adfe02f90c707f5d91c5323d690db1842
+SHA256: 6e1611634385d326bd7028075fd13cccacc5096d0c70f0c5ec353db82186a8a0
+SHA512: cd67327617f0ab3b529feaf3ef406ea85eb86e80b07178dc8a71076dc9107f5295a3d5e1ced6f8dfc3ca9552ee4ece0f1d3cfbf4dff3069a054c7fd1fce78a55
+Description: Pars Linux İçerik Üretici Modülü - Audacity
+ Çok izli ses kaydetme, düzenleme, miksaj ve efekt uygulama
+ aracı Audacity modülü.
+
+Package: pars-creator-gimp
+Priority: optional
+Section: graphics
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: gimp
+Recommends: gimp-plugin-registry, gimp-data-extras
+Filename: pool/main/p/pars-creator-gimp/pars-creator-gimp_1.0.0_all.deb
+Size: 836
+MD5sum: 7afa5fe16162b7125d8d4fa5fcb9c94d
+SHA1: 80745061ac50bdcb1c3bf511a6bd876ab6b006b4
+SHA256: 06885784016e1a426a15eafa369f7b05109cf61b1b448d716b7a81d659185de1
+SHA512: 800deb935ee7076385f083a3378495e82d865f052e0564efe76cc65718cf41ca1f0af9865f23204c911df7cfa1b19521b2f0e2062f018ac9f79a13be719e5ca5
+Description: Pars Linux İçerik Üretici Modülü - GIMP
+ GNU İmaj Düzenleme Programı (GIMP) ve popüler eklentilerini içeren
+ raster grafik ve fotoğraf işleme modülü.
+
+Package: pars-creator-inkscape
+Priority: optional
+Section: graphics
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: inkscape
+Filename: pool/main/p/pars-creator-inkscape/pars-creator-inkscape_1.0.0_all.deb
+Size: 786
+MD5sum: a93f224d3a9126bd8e2d4f8436f51dc0
+SHA1: 6fa49b5c50a17199a94b5a2c4fe7f7424c671cf3
+SHA256: 35f5d0fd21f1b34d6f94707c78f0d6a6a11cdd4682b776c462e631c7cd4ce31f
+SHA512: 2c2feb59a53a3eb1e410927fae08edee61d1b5095ecf082cf4d9bd2ca1c1aba21010725157e2e6fefc9bce482bf697026ca58484c826d247775789b470c128b0
+Description: Pars Linux İçerik Üretici Modülü - Inkscape
+ Profesyonel vektörel çizim, SVG formatı ve grafik tasarım
+ aracı Inkscape modülü.
+
+Package: pars-creator-kdenlive
+Priority: optional
+Section: video
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: kdenlive
+Recommends: frei0r-plugins, swh-plugins, mediainfo
+Filename: pool/main/p/pars-creator-kdenlive/pars-creator-kdenlive_1.0.0_all.deb
+Size: 846
+MD5sum: bdb39f30dc80b42261a16c353a028d50
+SHA1: 5e0b82fcd9686feb9e60ef7d890e55b5f9043fa6
+SHA256: 03a00900de7abb74de068f923d2a8a6c13c667e887698027e1fc01973e3754bc
+SHA512: 003a39ad891050d431bbb7664730276f3becb08fe03dd45289ff56f655ed9bf3b16250dded1dd19ccef953cc212c6fa5ec9f8f6f39c604c2b85c9d2a8a7b918a
+Description: Pars Linux İçerik Üretici Modülü - Kdenlive
+ MLT framework tabanlı, çok kanallı profesyonel doğrusal olmayan
+ (non-linear) video kurgu ve montaj yazılımı.
+
+Package: pars-creator-obs
+Priority: optional
+Section: video
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: obs-studio
+Recommends: v4l2loopback-dkms
+Filename: pool/main/p/pars-creator-obs/pars-creator-obs_1.0.0_all.deb
+Size: 834
+MD5sum: 88e741fdf0e73c034d0d9e80d76d38bb
+SHA1: 434aa2692352159cccacd18ed709651650661ede
+SHA256: 3a0bcd074075fe1467820f0742237f37718e2a40638a7e99ed8e9fba943c4920
+SHA512: f4db5e8e2ce634952aa4f337f81601d49bf5ae62c8dd56f44a64c97bbdecec5ade244806a4c24949eb38dc242d66b4bd1d4e63618ff3e1cc15917c195c6beb49
+Description: Pars Linux İçerik Üretici Modülü - OBS Studio
+ Canlı yayın ve ekran kaydı yazılımı Open Broadcaster Software (OBS).
+ Sanal kamera desteği için v4l2loopback önerilir.
+
+Package: pars-desktop-gnome
+Priority: optional
+Section: metapackages
+Maintainer: Pars Linux Developers <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Replaces: pardus-gnome-desktop
+Depends: pars-base, gnome-core, parslinux-gnome-settings | pardus-gnome-settings, gdm3, gnome-shell
+Recommends: pars-about | pardus-about, parslinux-gnome-greeter | pardus-gnome-greeter, pars-update | pardus-update, parslinux-software | pardus-software | gnome-software, pars-image-writer | pardus-image-writer, parslinux-shortcuts | pardus-gnome-shortcuts, pars-mycomputer | pardus-mycomputer, parslinux-package-installer | pardus-package-installer, parslinux-formatter | pardus-usb-formatter, parslinux-boot-repair, brasero, cups, drawing, evolution, file-roller, gimp, gnome-console, gnome-power-manager, gnome-screenshot, gnome-text-editor, gnome-tweaks, hunspell-tr, libcanberra-gtk3-module, libreoffice, libreoffice-gnome, libreoffice-gtk3, libreoffice-l10n-tr, malcontent, orca, power-profiles-daemon, rar, rhythmbox, simple-scan, synaptic, vlc
+Conflicts: pardus-gnome-desktop
+Breaks: pardus-gnome-desktop
+Filename: pool/main/p/pars-desktop-gnome/pars-desktop-gnome_1.0.0_all.deb
+Size: 1196
+MD5sum: eb17b03f128b42a805f1182bca75a13b
+SHA1: 531f5b1a94de54e53ddcc9022129daf2f9f5ab2b
+SHA256: 2d624327ecec9f7124f39355e3b66b9ac19f4dd581912c35e71159177d6bbba7
+SHA512: b34d615c1c4e3e8b3545d72f101c1d45f0faf1a69422d0f9b2723af38e04126c13fb9c592278408505f3a9760fb2dd484fde1d829b29dac70db3dcf362ff04fa
+Description: Pars Linux GNOME Desktop Metapackage
+ This metapackage installs the complete Pars Linux GNOME desktop environment.
+ It connects the core system foundation (pars-base) with the modern GNOME Shell,
+ Pars visual configurations, and essential system utilities including Greeter,
+ Pars About, Pars Update, Software Center, and Image Writer.
+
+Package: pars-dev
+Priority: optional
+Section: metapackages
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: pars-dev-git (= 1.0.0)
+Recommends: pars-dev-codium (= 1.0.0), pars-dev-docker (= 1.0.0), pars-dev-dbeaver (= 1.0.0)
+Filename: pool/main/p/pars-dev/pars-dev_1.0.0_all.deb
+Size: 872
+MD5sum: 83a5c3e688bcf4c33bf3a1ffb8e48ccc
+SHA1: 8b9db8c7c81025b0f1ef0b244d9dbeb38a7ad50c
+SHA256: 2857869d0762532c026e203a5cd743be0d6ea107de76370784c032cf7786fdbe
+SHA512: 9e08af3f5fe7c69de4e71f3073ce4e9a7be7aa19adec31be54a1d41ddd3fc8e2ce309c63e37feed259e19380c6afae54ed0926cae1d1532d4fe1b6d729efcb7c
+Description: Pars Linux Geliştirici Meta Paketi (Tüm Dev Rolü)
+ Pars Linux için modern yazılım geliştirme ortamını (Git, VS Codium,
+ Docker, DBeaver) sağlayan üst meta pakettir.
+ .
+ Modüler alt bileşenler:
+  - pars-dev-git
+  - pars-dev-codium
+  - pars-dev-docker
+  - pars-dev-dbeaver
+
+Package: pars-dev-codium
+Priority: optional
+Section: devel
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: codium | vscodium | code | flatpak
+Filename: pool/main/p/pars-dev-codium/pars-dev-codium_1.0.0_all.deb
+Size: 814
+MD5sum: 08684cd3129397fa24149a5aca522057
+SHA1: f46a876b33de0cd05c2311cc56425ae9a3070ef2
+SHA256: 63167aaa952dcf15a7ff0cad3c2eaa76b8bb92a1ae1decb381ae9b461be4935c
+SHA512: 29751161bdd8e3e370af24240cb5a0f2e7987fc00c1d89068276efde7549f25aeb8badf593af47fb5c478fafe6a79d9bb45182c8c0135b3fa30323a09298da60
+Description: Pars Linux Geliştirici Modülü - VS Codium
+ Telemetriden arındırılmış, açık kaynak kodlu Visual Studio Code
+ ikili dağıtımı (VSCodium) entegrasyonu.
+
+Package: pars-dev-dbeaver
+Priority: optional
+Section: database
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: dbeaver-ce | flatpak
+Filename: pool/main/p/pars-dev-dbeaver/pars-dev-dbeaver_1.0.0_all.deb
+Size: 828
+MD5sum: 00ebaf95c6a76960e201f008c58c16e7
+SHA1: ea1e9e8e5add464fb454051ff72656f762a7c692
+SHA256: 0b497c8c7e49f29b20cad08a1d8728d404ba8b0ee34e6794e784004ee166da22
+SHA512: 0e23b550e9ffac2bfb03ca77eded417bce44810edc6e40fc8dabcf2237015b70297f7ee1cca55f387f9d41ad4d9907faa0fc4bdc715754e8422d76e8bd0a4436
+Description: Pars Linux Geliştirici Modülü - DBeaver Universal DB Client
+ PostgreSQL, MySQL, SQLite, Oracle ve birçok veritabanı yönetimini
+ destekleyen evrensel açık kaynak SQL istemcisi.
+
+Package: pars-dev-docker
+Priority: optional
+Section: admin
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: docker.io | docker-ce, docker-compose-plugin | docker-compose
+Recommends: containerd
+Filename: pool/main/p/pars-dev-docker/pars-dev-docker_1.0.0_all.deb
+Size: 1064
+MD5sum: c1b12d4b2364e54fd84cf0053799d504
+SHA1: 6e7f0ad2bd700479dda720159543ebf4334d32e2
+SHA256: af701dbeab00532d5be681dca83a62e6a3bb488b6afe52d50515e489eb2f219c
+SHA512: 224c18ebc82091432cb5a68b36f7eff2a2c6eb3a9840c715dcab9f4e7da352e07830238b7675119eb859ce850592980c134b608b60873e579536a8fade788abe
+Description: Pars Linux Geliştirici Modülü - Docker & Konteyner
+ Docker Engine ve Docker Compose geliştirici ortamı.
+ Kurulum sonrası kullanıcı izinleri ve servis konfigürasyonunu yönetir.
+
+Package: pars-dev-git
+Priority: optional
+Section: vcs
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: git, git-lfs
+Recommends: tig, gh
+Filename: pool/main/p/pars-dev-git/pars-dev-git_1.0.0_all.deb
+Size: 798
+MD5sum: a079d677484c1b964ed01115dd14c442
+SHA1: 951f1c3cf9a27aade951f7bc7756d8c744c5fdfc
+SHA256: 5c2ff046f8f548fb0815d529a817c66ab0251f0133d5349d1a6eb5eca63f56d1
+SHA512: b7a84037e086634ffdd57ece5331e964c9dc78df56df47b079d5835bd4874550ab8455e77c887c41a25b0a325fbc7c679d09f93b080f8a735dbf27007cfae4c3
+Description: Pars Linux Geliştirici Modülü - Git & VCS
+ Git versiyon kontrol sistemi, Git Large File Storage (LFS)
+ ve yardımcı geliştirici araçlarını içerir.
+
+Package: pars-gaming
+Priority: optional
+Section: metapackages
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: pars-gaming-gamemode (= 1.0.0), pars-gaming-mangohud (= 1.0.0)
+Recommends: pars-gaming-steam (= 1.0.0), pars-gaming-lutris (= 1.0.0), pars-gaming-heroic (= 1.0.0)
+Filename: pool/main/p/pars-gaming/pars-gaming_1.0.0_all.deb
+Size: 892
+MD5sum: d2067ed687605051558ac758a32cf73d
+SHA1: 81dff9a3225b7583f1cc6639b81250100c073ef0
+SHA256: c676ee3e4ac493c292cc41345133315d7e8cb15681182bf8553c677313ded350
+SHA512: b52dd6ea52d6d891b11b666c6b4f20c54130ff025762fbf48aa2acf34a3a059cd038204a98dde18966055b30cff8d75f85d7024054d3c02d192feb0c29a6f38b
+Description: Pars Linux Oyun Meta Paketi (Tüm Oyun Rolü)
+ Pars Linux için oyun ekosistemini (Steam, Lutris, Heroic, GameMode, MangoHud)
+ tek seferde veya modüler olarak sağlayan üst meta pakettir.
+ .
+ Modüler alt bileşenler:
+  - pars-gaming-steam
+  - pars-gaming-lutris
+  - pars-gaming-heroic
+  - pars-gaming-gamemode
+  - pars-gaming-mangohud
+
+Package: pars-gaming-gamemode
+Priority: optional
+Section: admin
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: gamemode
+Recommends: libgamemodeauto0
+Filename: pool/main/p/pars-gaming-gamemode/pars-gaming-gamemode_1.0.0_all.deb
+Size: 826
+MD5sum: ea19dd7e168226e5fb2e7805d57958e4
+SHA1: bc1fb17132cbfcbfa82f6cd27227d79ed27df38e
+SHA256: 235f9ace3372e44f753d546bc7a6b6ad49999bfcb44a37f53cbe9587495cb109
+SHA512: 452689d6cf8a2f06df54d1d552c7ccf14e781f9b56d05b6381f6e50ddd0c5a19ca29224fd157b230449f2b9b0447adbba1d1dee580d7a2599547ac4e6966cf55
+Description: Pars Linux Oyun Modülü - GameMode
+ Feral GameMode arka plan servisi ile işlemci frekansı, GPU performansı
+ ve I/O önceliklerini oyun esnasında dinamik olarak optimize eder.
+
+Package: pars-gaming-heroic
+Priority: optional
+Section: games
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: heroic | flatpak
+Filename: pool/main/p/pars-gaming-heroic/pars-gaming-heroic_1.0.0_all.deb
+Size: 796
+MD5sum: ff7a8e999ac70d3f5234f592dcf4bc48
+SHA1: e893286bc6c2f55eb1616d7cb877de8783d480ed
+SHA256: 931d7bba88fe09b7cce83439311cd6b6b05400a8a35253355a9ff1dafade2df0
+SHA512: 016dc5cdd901d16118f595263f48ab3ca521a5863fc9cb0bc92513946cb11418122050e2dad90758abc90dbdf700b36fb23eb4d0a18876993a327a1a683c71b5
+Description: Pars Linux Oyun Modülü - Heroic Games Launcher
+ Epic Games, GOG ve Amazon Prime oyunlarını yönetmek için
+ açık kaynaklı Heroic Games Launcher entegrasyonu.
+
+Package: pars-gaming-lutris
+Priority: optional
+Section: games
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: lutris
+Recommends: wine, winetricks
+Filename: pool/main/p/pars-gaming-lutris/pars-gaming-lutris_1.0.0_all.deb
+Size: 806
+MD5sum: 540d0fe45b15d626d87ac21fdb0e1f71
+SHA1: 16dab71cc7cf8871a15b84868255044657a7db07
+SHA256: 0b0d15a224b84ef4ebf6f4a80ac3641d81304d2d4e2459f40ea2f991d8a37673
+SHA512: f30532c2e5c98d303accd3ada115cf9259f55fc44bee74feccd805f6d536caab9e7b56cb7ff51ca924b454e53e769d00403de4021f8ec5213ff49dd05b643f86
+Description: Pars Linux Oyun Modülü - Lutris
+ Açık kaynaklı oyun yönetim platformu Lutris ve WINE araçlarını
+ sağlayan modüler oyun meta paketi.
+
+Package: pars-gaming-mangohud
+Priority: optional
+Section: utils
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: mangohud
+Recommends: goverlay
+Filename: pool/main/p/pars-gaming-mangohud/pars-gaming-mangohud_1.0.0_all.deb
+Size: 826
+MD5sum: fe391fce995c43b32f7e4a6d9c68535e
+SHA1: 522831f444923581de7efd669c92cb21543be9fe
+SHA256: 7ec794da86bd9290a9f4f9b4b653a45f6022c55503df004f9ee2718dbc2f0efa
+SHA512: 89b466af345c65229be88a5a6d8cd186c455b66e8d4547250d865428865da295aa9fb262f253207febccb0bef7c985dc7dd4ac643de8aa9c1ba4641fd7d94107
+Description: Pars Linux Oyun Modülü - MangoHud
+ Vulkan ve OpenGL oyunlarında FPS, sıcaklık, CPU/GPU kullanımı
+ ve kare zamanlamalarını ekranda gösteren performans katmanı.
+
+Package: pars-gaming-steam
+Priority: optional
+Section: games
+Maintainer: Pars Linux Ekibi <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: steam-installer | steam
+Recommends: steam-devices
+Filename: pool/main/p/pars-gaming-steam/pars-gaming-steam_1.0.0_all.deb
+Size: 796
+MD5sum: fbb9e81771774ae37c3be44d81a035ad
+SHA1: c504c26008840e2dc0c590061ae705e34d394437
+SHA256: 7c55ea2998da49fa05ed4a5d7ad50f3ebdb7d47ba6c3e0142997a84adb2fd341
+SHA512: 33a121d5d8be6c44d296459f72daa0058f9c802411ba27bb71a5beec04f62067389ecfa85bd56792ff3fae1eac6ad0c48c78d1ee41e98b52761dbb751076aa18
+Description: Pars Linux Oyun Modülü - Steam
+ Valve Steam istemcisi ve kontrolcü donanım kurallarını içeren
+ granüler oyun modülü meta paketi.
+
+Package: pars-mycomputer
+Priority: optional
+Section: utils
+Maintainer: Pars Linux Topluluğu <https://github.com/parslinux>
+Architecture: all
+Version: 0.8.2
+Depends: python3, python3-gi, gir1.2-gtk-3.0, gir1.2-glib-2.0, gir1.2-notify-0.7, gir1.2-pango-1.0
+Recommends: gvfs-fuse
+Filename: pool/main/p/pars-mycomputer/pars-mycomputer_0.8.2_all.deb
+Size: 226042
+MD5sum: d2cf8b57d9d17e1f8003f828bd4d0ee7
+SHA1: d9f76e994913745842b179787daa0037b79014dd
+SHA256: b11d3667b0117bb53c0a35dcde8dd7d193779d63b796423f55cb6bd68b30d6aa
+SHA512: 8a2489bb81685995020d2baf2dffc11e51e2560616c06f82681d249f81b3d9916bea8537cd593671f90812e081e3ae908b2802380eef77cdd7ac33a5442d1312
+Description: Pars My Computer - UI for disk information and management
+ My Computer, modern user interface for disk information and management.
+
+Package: pars-setup
+Priority: optional
+Section: admin
+Maintainer: ParsLinux Team <contact@parslinux.org>
+Architecture: all
+Version: 26.04.1
+Depends: python3 (>= 3.10), python3-gi, python3-gi-cairo, gir1.2-gtk-4.0, gir1.2-adw-1, python3-psutil, gettext, policykit-1
+Filename: pool/main/p/pars-setup/pars-setup_26.04.1_all.deb
+Size: 300548
+MD5sum: abade9b99585a88eec3bd2bc4c542c5f
+SHA1: 97f96f45f5b4497a3999148cab3c9fec59e9eb3e
+SHA256: 2ae72159bc08f94c10f0fdeeeee567e08180f9c67da14ac0d4f1596ac3ff6cde
+SHA512: f5943904ba308872767de18a0578f0b42465dede89c7ab3e6dace87a79bb659fdd03f1fc7dcad81d030c4ffe60e58ab132baf15fe1e9a35e3225ecc8b734046e
+Description: ParsLinux OS Kurulum Sihirbazı
+ ParsLinux 26.04 LTS ve modern Linux dağıtımları için Libadwaita
+ ve GTK4 tabanlı, Pardus ve Calamares standartlarında işletim sistemi
+ kurulum sihirbazı.
+Homepage: https://parslinux.org
+
+Package: parslinux-boot-repair
+Priority: optional
+Section: utils
+Maintainer: Pars Linux Developers <dev@parslinux.org>
+Architecture: all
+Version: 1.2.0-parslinux1
+Replaces: pardus-boot-repair (<= 1.1.0)
+Provides: pardus-boot-repair (= ${binary:Version})
+Depends: libc6, python3 (>= 3.8), python3-gi, gir1.2-gtk-3.0, gir1.2-handy-1, gir1.2-vte-2.91, libc6, live-boot, zip, cryptsetup, lvm2, btrfs-progs, e2fsprogs, dosfstools, efibootmgr, parted
+Conflicts: pardus-boot-repair
+Filename: pool/main/p/parslinux-boot-repair/parslinux-boot-repair_1.2.0-parslinux1_all.deb
+Size: 61440
+MD5sum: a0716c61e50b0e194d000fdd84281000
+SHA1: 6454b700e540038b1e3ea20068cae002357256d7
+SHA256: 77cd5a6d38d55efcb34cc15efa827c50bd4e9740db370d4a609bec75c68db8e0
+SHA512: ed8a59f02d09120f0fa68fadf2ab3173da69382bfb5ce9d46ff42446d94bd9e924ae897e147a0f253550ea1d2097fc4811f0a6944792c045dd4ac7e65bc1607a
+Description: Pars Linux boot and system repair tool
+ Pars Linux Boot Repair provides graphical and automated tools to repair
+ damaged GRUB and EFI bootloaders, perform filesystem checks (ext4, btrfs),
+ chroot into installed rootfs systems, reset user passwords, and fix
+ broken APT packages.
+Homepage: https://parslinux.org
+
+Package: parslinux-editor
+Priority: optional
+Section: utils
+Maintainer: Pars Linux Team <dev@parslinux.org>
+Architecture: all
+Version: 2.0.0
+Filename: pool/main/p/parslinux-editor/parslinux-editor_2.0.0_all.deb
+Size: 976
+MD5sum: d98af31b36a1f898246e5f4a7b35b20e
+SHA1: 07043ec275ae256b93fbc7ec4a96078c864ac71a
+SHA256: f809baf767b8a703b749ed1299455b99f92fee5371434d4fd158dc2b7eddc263
+SHA512: e9d3f65be88e97d7930e1fe8f182ba3d23b19e8312cc335ca3344c5ce6a55dcf0387674b3018d45169c7c58e32e71b099d8146b67b8a6f2cf839620f21232965
+Description: Modern lightweight text editor
+ Full description for parslinux-editor on Pars Linux.
+Homepage: https://parslinux.org
+
+Package: parslinux-gnome-settings
+Priority: optional
+Section: gnome
+Maintainer: Pars Linux Developers <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: fonts-ubuntu, adw-gtk3-theme, parslinux-gnome-icon-theme | pardus-gnome-icon-theme
+Filename: pool/main/p/parslinux-gnome-settings/parslinux-gnome-settings_1.0.0_all.deb
+Size: 39028
+MD5sum: 37beb16d33889cb126079a0fea48fbce
+SHA1: 96a10f1caafb47b7252b15b01d21f523b221d3a7
+SHA256: 946d10f4c983677c460ea9d160c363ffe95caa20edc81a114a1758527f8aa24a
+SHA512: dd5d229622bd2ef180944c2a66854a2ba2f5f36d899d5341b5e049ad4dce07f8b05e22128e466f8f9aa81cfe595cb17f74449601967f5215e601b81091a105ee
+Description: default settings for the Pars Linux GNOME desktop
+ This package contains the default settings used by Pars Linux.
+Homepage: https://github.com/parslinux/parslinux-gnome-settings
+
+Package: parslinux-hello
+Priority: optional
+Section: utils
+Installed-Size: 42
+Maintainer: Pars Linux Team <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Depends: libc6 (>= 2.34), bash
+Filename: pool/main/p/parslinux-hello/parslinux-hello_1.0.0_all.deb
+Size: 816
+MD5sum: 51c02b40cacf3e51f915052bb65501b7
+SHA1: bc58f9fe56e06f184d3a8b79dbf196dd62acc4ca
+SHA256: 35da4960379f5269213a136e1bdf55ff0153b2a3d83d95e67aae213121084313
+SHA512: 27ca8169c67cba5ae344515e74a41d8a51827c244ca5d1c79e09b0c1dc391280d6d81154caae34aa78ae29489e8f5f783755523150f3c4292c8aa6867391e06d
+Description: Pars Linux Hello Test Package
+ A test Debian package to demonstrate parslinux-package-installer.
+ It includes test files and dependency specifications.
+Homepage: https://parslinux.org
+
+Package: parslinux-menus
+Priority: optional
+Section: x11
+Maintainer: ParsLinux Dev Team <dev@parslinux.org>
+Architecture: all
+Version: 2026.1
+Replaces: pardus-menus (<= 2023.0)
+Provides: pardus-menus (= ${binary:Version})
+Depends: ${misc:Depends}
+Conflicts: pardus-menus
+Filename: pool/main/p/parslinux-menus/parslinux-menus_2026.1_all.deb
+Size: 103874
+MD5sum: bd6c82610c2bcf5bac4a8135eb6efb2e
+SHA1: 7c992154bb021e6d98b1ad87cfb8f56db2bbff1b
+SHA256: a1dd501335250500bb30a97a31f7545d770ed98effa1540b6bb09546532407ca
+SHA512: b0905e512d5c1618c8330554fb48a6497b25d6eb3570231cdea7f96624c7e3977c174eefc6355bd443b038caa23d0ba60d2fbd4475e585e1a7c7593806f29067
+Description: ParsLinux XDG Menus and desktop categories
+ This package provides standard FreeDesktop.org (XDG) menu definitions,
+ desktop directory files and category icons for ParsLinux desktop environments.
+ .
+ It adds the dedicated "Pars Araçları" (Pars Tools) application category
+ in GNOME, XFCE, KDE, Cinnamon, MATE, and other compatible desktops.Version: 2026.1
+Homepage: https://github.com/parslinux/parslinux-menus
+
+Package: parslinux-nvidia-installer
+Priority: optional
+Section: admin
+Maintainer: ParsLinux Developers <dev@parslinux.org> debhelper-compat (= 13), meson, ninja-build, gettext, pkg-config,
+Architecture: all
+Version: 1.0.0-1
+Replaces: pardus-nvidia-installer
+Provides: pardus-nvidia-installer
+Depends: ${shlibs:Depends}, ${misc:Depends}, python3, python3-gi, gir1.2-gtk-3.0, gir1.2-vte-2.91, gir1.2-polkit-1.0, python3-apt, pciutils, gnupg, 
+Conflicts: pardus-nvidia-installer
+Filename: pool/main/p/parslinux-nvidia-installer/parslinux-nvidia-installer_1.0.0-1_all.deb
+Size: 72590
+MD5sum: c256470884874b35ec280463d37579db
+SHA1: e1d40dc45899564eeafd645167f46947a9f592dd
+SHA256: cd3dbf888b71e439191374e3bdf566f5f0506cd05bee4b68146c78ee4384c575
+SHA512: 0f373d5e61716c66c51e0aa86f255f01f55cabc0f72323dead22e75d81d0539a63b74db6e3fb6e8aa2735ba5dec7355b650be8d3e85461c0dc2e07edd8668a83
+Description: ParsLinux NVIDIA graphics driver installer and GPU manager
+ A graphical tool that helps you install and manage NVIDIA GPU drivers
+ on ParsLinux. It detects your hardware, suggests fitting proprietary
+ or open-source drivers, integrates official repositories, and manages
+ secondary GPUs on hybrid laptops.
+
+Package: parslinux-shortcuts
+Priority: optional
+Section: utils
+Maintainer: Pars Linux Team <dev@parslinux.org>
+Architecture: all
+Version: 0.1.0
+Replaces: pardus-gnome-shortcuts
+Depends: python3, python3 (>= 3.8), gir1.2-gtk-4.0, gir1.2-adw-1, python3-gi, dconf-gsettings-backend | gsettings-desktop-schemas
+Breaks: pardus-gnome-shortcuts
+Filename: pool/main/p/parslinux-shortcuts/parslinux-shortcuts_0.1.0_all.deb
+Size: 2504594
+MD5sum: c28a74e150a15e2d4255e24ae2ddb124
+SHA1: e0e4cf24982c76b507b230ebd0e202096cf2742c
+SHA256: 8babd55ec3c181dd96e2f015328fcc4f05c7452dcea13ff506988c5d2ed44df1
+SHA512: 2fb40efbfd741e681c44d69538370201592e31ee8c18f8959123a724a8779889ac3239c6ffb76630c7f71a1cb48f67a5b4d78b6a19b5357e548c165ab67de0cf
+Description: Pars Linux Keyboard Shortcuts Guide
+ Pars Linux shortcuts guide and greeter companion application that shows
+ keyboard shortcuts categorized with search and visual key combinations.
+Homepage: https://parslinux.org
+
+Package: parslinux-theme
+Priority: optional
+Section: utils
+Maintainer: Pars Linux Team <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Filename: pool/main/p/parslinux-theme/parslinux-theme_1.0.0_all.deb
+Size: 904
+MD5sum: 50c051dfdfb62dc96c02b6e34af52e0d
+SHA1: a19e633a75e4500be2abad02a24f7a15b859acdb
+SHA256: 22f496d1c8b174046dcecb484e0feeb31b4174261c42a23fa437bffe0697f1ab
+SHA512: 5377e8a2f23d3c78282a2685087769c911dfbc0568e1e8cf2d1900826157f74c865e45f896bcc8b5d0e48d25cdaf05ca0ed1394d1f31a8c0ee6443bd13c02307
+Description: Official dark theme for Pars Linux
+ Full description for parslinux-theme on Pars Linux.
+Homepage: https://parslinux.org
+

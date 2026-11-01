@@ -98,6 +98,14 @@ Herhangi bir `.deb` dosyasını veya bir dizindeki tüm paketleri ekleyin:
 > ```
 
 ### Adım 5: Sunucuyu Çalıştırma
+
+Görsel Web Arayüzü (Dashboard) ve APT Deposu için **(Tavsiye Edilen)**:
+```bash
+./scripts/06_start_web_dashboard.sh 8080
+```
+> Bu komut modern görsel kontrol panelini (`http://localhost:8080/`) ve APT depo uç noktasını (`http://localhost:8080/dists/`) birlikte sunar.
+
+Sadece Aptly'nin ham/CLI dosya sunucusunu çalıştırmak isterseniz (görsel arayüz içermez):
 ```bash
 ./bin/aptly serve -listen=:8080
 ```

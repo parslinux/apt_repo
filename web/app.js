@@ -365,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         packagesGrid.innerHTML = filtered.map(pkg => {
             const pm = (downloadMetrics.top_packages || []).find(p => p.name === pkg.name);
             const dlBadge = (pm && pm.downloads > 0) ? `<span>•</span><span style="color: #38bdf8; font-weight: 600;" title="${pm.downloads} kez indirildi">📥 ${pm.downloads}</span>` : '';
+            const debUrl = pkg.filename ? ('/' + pkg.filename.replace(/^\/+/, '')) : '#';
             return `
             <div class="package-card" data-pkg="${encodeURIComponent(JSON.stringify(pkg))}">
                 <div>
@@ -386,16 +387,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div class="package-actions">
-                        <button class="btn btn-primary btn-sm btn-install" data-pkgname="${escapeHtml(pkg.name)}" title="Kurulum komutunu kopyala">
+                        <a href="${debUrl}" download class="btn btn-primary btn-sm btn-deb-dl" title="${escapeHtml(pkg.name)} .deb paket dosyasını indir">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>.deb İndir</span>
+                        </a>
+
+                        <button class="btn btn-secondary btn-sm btn-details" data-pkgname="${escapeHtml(pkg.name)}" title="Paket detaylarını görüntüle">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <span>Detaylar</span>
+                        </button>
+
+                        <button class="btn btn-secondary btn-sm btn-install" data-pkgname="${escapeHtml(pkg.name)}" title="Kurulum komutunu kopyala">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                             </svg>
                             <span>apt install</span>
-                        </button>
-
-                        <button class="btn btn-secondary btn-sm btn-details" data-pkgname="${escapeHtml(pkg.name)}">
-                            Detaylar
                         </button>
                     </div>
                 </div>
@@ -404,6 +419,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
 
         // Kart içi buton dinleyicileri
+        packagesGrid.querySelectorAll('.btn-deb-dl').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+
         packagesGrid.querySelectorAll('.btn-install').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();

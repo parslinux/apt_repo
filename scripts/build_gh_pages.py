@@ -77,7 +77,7 @@ def generate_html(packages, total_count=31):
         clean_desc_data = desc.lower().replace('"', '&quot;')
         clean_desc_display = desc.replace("<", "&lt;").replace(">", "&gt;")
 
-        card = f"""            <div class="pkg-card" data-name="{name}" data-arch="{arch}" data-size="{p['size']}" data-desc="{clean_desc_data}">
+        card = f"""            <div class="pkg-card" data-name="{name}" data-version="{version}" data-arch="{arch}" data-size="{p['size']}" data-sizestr="{size_str}" data-dllink="{dl_link}" data-desc="{clean_desc_data}" data-rawdesc="{clean_desc_display}">
                 <div>
                     <div class="pkg-header">
                         <div class="pkg-name">{name}</div>
@@ -87,9 +87,14 @@ def generate_html(packages, total_count=31):
                 </div>
                 <div class="pkg-meta">
                     <span>Mimari: {arch} • {size_str}</span>
-                    <a href="{dl_link}" class="dl-btn" download>
-                        <span>⬇</span> .deb İndir
-                    </a>
+                    <div class="pkg-actions-btns">
+                        <button class="details-btn" onclick="openPkgModal(this.closest('.pkg-card'))" title="Paket Detayları">
+                            <span>ℹ️</span> Detaylar
+                        </button>
+                        <a href="{dl_link}" class="dl-btn" download title=".deb Paketini İndir">
+                            <span>⬇</span> .deb İndir
+                        </a>
+                    </div>
                 </div>
             </div>"""
         cards_html.append(card)
@@ -577,6 +582,36 @@ def generate_html(packages, total_count=31):
             color: #64748b;
         }}
 
+        .pkg-actions-btns {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }}
+
+        .details-btn {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82rem;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }}
+
+        .details-btn:hover {{
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }}
+
         .dl-btn {{
             display: inline-flex;
             align-items: center;
@@ -595,6 +630,172 @@ def generate_html(packages, total_count=31):
         .dl-btn:hover {{
             background: var(--primary);
             color: #ffffff;
+            transform: translateY(-1px);
+        }}
+
+        /* Modal Stilleri */
+        .modal-backdrop {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(3, 7, 18, 0.82);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1.5rem;
+        }}
+
+        .modal-backdrop.active {{
+            display: flex;
+        }}
+
+        .modal-content {{
+            background: #121826;
+            border: 1px solid #1f293d;
+            border-radius: 1.25rem;
+            max-width: 620px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(99, 102, 241, 0.15);
+            overflow: hidden;
+            animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }}
+
+        @keyframes modalFadeIn {{
+            from {{ opacity: 0; transform: scale(0.95) translateY(10px); }}
+            to {{ opacity: 1; transform: scale(1) translateY(0); }}
+        }}
+
+        .modal-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--surface-border);
+            gap: 1rem;
+        }}
+
+        .modal-header h3 {{
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+        }}
+
+        .modal-badge-ver {{
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #38bdf8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.35rem;
+            font-family: 'JetBrains Mono', monospace;
+        }}
+
+        .modal-badge-arch {{
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #10b981;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.35rem;
+            font-family: 'JetBrains Mono', monospace;
+        }}
+
+        .modal-close {{
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-size: 1.35rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }}
+
+        .modal-close:hover {{
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+        }}
+
+        .modal-body {{
+            padding: 1.5rem;
+        }}
+
+        .modal-desc {{
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+            max-height: 180px;
+            overflow-y: auto;
+        }}
+
+        .modal-cmd-box {{
+            background: #060911;
+            border: 1px solid var(--surface-border);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+        }}
+
+        .modal-cmd-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }}
+
+        .modal-copy-btn {{
+            background: var(--primary);
+            border: none;
+            color: #ffffff;
+            padding: 0.25rem 0.65rem;
+            border-radius: 0.4rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }}
+
+        .modal-copy-btn:hover {{
+            opacity: 0.9;
+        }}
+
+        .modal-cmd-code {{
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            color: #38bdf8;
+            display: block;
+            word-break: break-all;
+        }}
+
+        .modal-footer {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }}
+
+        .modal-meta {{
+            font-size: 0.82rem;
+            color: #64748b;
         }}
 
         footer {{
@@ -825,7 +1026,94 @@ sudo apt update`
 
             cards.forEach(card => grid.appendChild(card));
         }}
+
+        function openPkgModal(card) {{
+            if (!card) return;
+            const name = card.getAttribute('data-name');
+            const version = card.getAttribute('data-version') || '';
+            const arch = card.getAttribute('data-arch') || '';
+            const desc = card.getAttribute('data-rawdesc') || '';
+            const sizeStr = card.getAttribute('data-sizestr') || '';
+            const dlLink = card.getAttribute('data-dllink') || '#';
+
+            document.getElementById('modalPkgTitle').textContent = name;
+            document.getElementById('modalPkgVerBadge').textContent = 'v' + version;
+            document.getElementById('modalPkgArchBadge').textContent = arch;
+            document.getElementById('modalPkgDesc').textContent = desc || 'Açıklama bulunmuyor.';
+            document.getElementById('modalInstallCmd').textContent = 'sudo apt install ' + name;
+            document.getElementById('modalMetaInfo').textContent = 'Mimari: ' + arch + ' • Boyut: ' + sizeStr;
+            const dlBtn = document.getElementById('modalDlBtn');
+            dlBtn.href = dlLink;
+            dlBtn.download = dlLink.split('/').pop() || name + '.deb';
+
+            const modal = document.getElementById('pkgModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }}
+
+        function closePkgModal() {{
+            const modal = document.getElementById('pkgModal');
+            if (modal) modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }}
+
+        function copyModalInstallCmd() {{
+            const cmd = document.getElementById('modalInstallCmd').textContent;
+            navigator.clipboard.writeText(cmd).then(() => {{
+                const btn = document.getElementById('modalCopyBtn');
+                const orig = btn.textContent;
+                btn.textContent = 'Kopyalandı! ✓';
+                btn.style.background = '#10b981';
+                setTimeout(() => {{
+                    btn.textContent = orig;
+                    btn.style.background = '';
+                }}, 2000);
+            }});
+        }}
+
+        document.addEventListener('keydown', (e) => {{
+            if (e.key === 'Escape') closePkgModal();
+        }});
+
+        const modalBackdrop = document.getElementById('pkgModal');
+        if (modalBackdrop) {{
+            modalBackdrop.addEventListener('click', (e) => {{
+                if (e.target === modalBackdrop) closePkgModal();
+            }});
+        }}
     </script>
+
+    <!-- Paket Detay Modalı -->
+    <div class="modal-backdrop" id="pkgModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalPkgTitle"></h3>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.4rem;">
+                        <span id="modalPkgVerBadge" class="modal-badge-ver"></span>
+                        <span id="modalPkgArchBadge" class="modal-badge-arch"></span>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closePkgModal()" title="Kapat">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalPkgDesc" class="modal-desc"></p>
+                <div class="modal-cmd-box">
+                    <div class="modal-cmd-header">
+                        <span>Terminal Kurulum Komutu:</span>
+                        <button class="modal-copy-btn" id="modalCopyBtn" onclick="copyModalInstallCmd()">Kopyala</button>
+                    </div>
+                    <code class="modal-cmd-code" id="modalInstallCmd"></code>
+                </div>
+                <div class="modal-footer">
+                    <span class="modal-meta" id="modalMetaInfo"></span>
+                    <a class="dl-btn" id="modalDlBtn" href="#" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>"""
     return html_content

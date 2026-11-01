@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParsLinux 26.04 LTS (Noble Pars) - Resmi APT Deposu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --surface: #121826;
+            --surface-hover: #1a2235;
+            --surface-border: #1f293d;
+            --primary: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --accent: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --card-glow: rgba(99, 102, 241, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.12) 0%, transparent 45%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            position: relative;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: #818cf8;
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.25rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .setup-section {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            margin-bottom: 3.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .setup-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+        }
+
+        .setup-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .code-block {
+            background: #070a11;
+            border: 1px solid #1e293b;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            position: relative;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.92rem;
+            color: #38bdf8;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #f1f5f9;
+            padding: 0.4rem 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: #334155;
+            border-color: #64748b;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 450px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border-radius: 0.75rem;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .stats-badge {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            padding: 0.6rem 1.25rem;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stats-badge b {
+            color: var(--accent);
+        }
+
+        .pkg-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .pkg-card {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+        }
+
+        .pkg-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), 0 0 20px var(--card-glow);
+        }
+
+        .pkg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            gap: 0.5rem;
+        }
+
+        .pkg-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pkg-version {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            white-space: nowrap;
+        }
+
+        .pkg-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .pkg-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--surface-border);
+            padding-top: 1rem;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .dl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+            padding: 0.4rem 0.85rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.82rem;
+            transition: all 0.2s ease;
+        }
+
+        .dl-btn:hover {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--surface-border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="badge">🐆 ParsLinux 26.04 LTS (Noble Pars)</div>
+            <h1>Resmi APT Paket Deposu</h1>
+            <p class="subtitle">ParsLinux ekosistemine ait tüm çekirdek masaüstü, kurulum aracı, temalar ve sistem uygulamalarının resmi dağıtım merkezi.</p>
+        </header>
+
+        <section class="setup-section">
+            <div class="setup-title">
+                <span>⚡</span> Depoyu Sisteminize Ekleyin
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Debian Bookworm, Ubuntu veya ParsLinux sisteminizde terminali açıp şu komutları çalıştırmanız yeterlidir:</p>
+            
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCommand()">Kopyala</button>
+                <code id="setup-cmd">echo "deb [trusted=yes] https://parslinux.github.io/apt_repo bookworm main" | sudo tee /etc/apt/sources.list.d/parslinux.list<br>sudo apt update</code>
+            </div>
+        </section>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="search" placeholder="Paket ara (örn: pars-setup, mycomputer)..." onkeyup="filterPackages()">
+            </div>
+            <div class="stats-badge">
+                Toplam <b id="pkg-count">30</b> Paket Mevcut
+            </div>
+        </div>
+
+        <div class="pkg-grid" id="pkg-grid">
+
+            <div class="pkg-card" data-name="pars-base" data-desc="pars linux base metapackage (core system, pipewire audio, fonts) this metapackage provides the core foundation of the pars linux operating system. it depends on essential system libraries, the modern pipewire multimedia sound architecture, turkish-compatible modern fonts, hardware abstraction layers, and the pars visual branding package. . all desktop environments (pars-desktop-gnome, pars-desktop-xfce) depend directly on this base package.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-base</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Base Metapackage (Core system, Pipewire audio, fonts) This metapackage provides the core foundation of the Pars Linux operating system. It depends on essential system libraries, the modern Pipewire multimedia sound architecture, Turkish-compatible modern fonts, hardware abstraction layers, and the Pars visual branding package. . All desktop environments (pars-desktop-gnome, pars-desktop-xfce) depend directly on this base package.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 3.2 KB</span>
+                    <a href="pool/main/p/pars-base/pars-base_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-branding" data-desc="parslinux brand identity, wallpapers and theme metapackage this package provides the official visual identity for parslinux: * parslinux official wallpapers and gnome background settings * vector svg brand logos and application icons * fastfetch ascii artwork and terminal system configuration * distribution release identity (os-release and issue) * system branding dependencies (gtk themes, icons, grub theme)">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-branding</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">ParsLinux Brand Identity, Wallpapers and Theme Metapackage This package provides the official visual identity for ParsLinux: * ParsLinux official wallpapers and GNOME background settings * Vector SVG brand logos and application icons * Fastfetch ASCII artwork and terminal system configuration * Distribution release identity (os-release and issue) * System branding dependencies (GTK themes, icons, grub theme)</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 369.8 KB</span>
+                    <a href="pool/main/p/pars-branding/pars-branding_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-creator" data-desc="pars linux i̇çerik üretici meta paketi (tüm creator rolü) pars linux için dijital içerik, grafik, video ve ses prodüksiyon araçlarını (obs studio, gimp, inkscape, kdenlive, audacity) bir araya getiren üst meta pakettir. . modüler alt bileşenler: - pars-creator-obs - pars-creator-gimp - pars-creator-inkscape - pars-creator-kdenlive - pars-creator-audacity">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-creator</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux İçerik Üretici Meta Paketi (Tüm Creator Rolü) Pars Linux için dijital içerik, grafik, video ve ses prodüksiyon araçlarını (OBS Studio, GIMP, Inkscape, Kdenlive, Audacity) bir araya getiren üst meta pakettir. . Modüler alt bileşenler: - pars-creator-obs - pars-creator-gimp - pars-creator-inkscape - pars-creator-kdenlive - pars-creator-audacity</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.9 KB</span>
+                    <a href="pool/main/p/pars-creator/pars-creator_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-creator-audacity" data-desc="pars linux i̇çerik üretici modülü - audacity çok izli ses kaydetme, düzenleme, miksaj ve efekt uygulama aracı audacity modülü.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-creator-audacity</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux İçerik Üretici Modülü - Audacity Çok izli ses kaydetme, düzenleme, miksaj ve efekt uygulama aracı Audacity modülü.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-creator-audacity/pars-creator-audacity_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-creator-gimp" data-desc="pars linux i̇çerik üretici modülü - gimp gnu i̇maj düzenleme programı (gimp) ve popüler eklentilerini içeren raster grafik ve fotoğraf işleme modülü.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-creator-gimp</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux İçerik Üretici Modülü - GIMP GNU İmaj Düzenleme Programı (GIMP) ve popüler eklentilerini içeren raster grafik ve fotoğraf işleme modülü.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-creator-gimp/pars-creator-gimp_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-creator-inkscape" data-desc="pars linux i̇çerik üretici modülü - inkscape profesyonel vektörel çizim, svg formatı ve grafik tasarım aracı inkscape modülü.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-creator-inkscape</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux İçerik Üretici Modülü - Inkscape Profesyonel vektörel çizim, SVG formatı ve grafik tasarım aracı Inkscape modülü.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-creator-inkscape/pars-creator-inkscape_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-creator-kdenlive" data-desc="pars linux i̇çerik üretici modülü - kdenlive mlt framework tabanlı, çok kanallı profesyonel doğrusal olmayan (non-linear) video kurgu ve montaj yazılımı.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-creator-kdenlive</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux İçerik Üretici Modülü - Kdenlive MLT framework tabanlı, çok kanallı profesyonel doğrusal olmayan (non-linear) video kurgu ve montaj yazılımı.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-creator-kdenlive/pars-creator-kdenlive_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-creator-obs" data-desc="pars linux i̇çerik üretici modülü - obs studio canlı yayın ve ekran kaydı yazılımı open broadcaster software (obs). sanal kamera desteği için v4l2loopback önerilir.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-creator-obs</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux İçerik Üretici Modülü - OBS Studio Canlı yayın ve ekran kaydı yazılımı Open Broadcaster Software (OBS). Sanal kamera desteği için v4l2loopback önerilir.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-creator-obs/pars-creator-obs_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-desktop-gnome" data-desc="pars linux gnome desktop metapackage this metapackage installs the complete pars linux gnome desktop environment. it connects the core system foundation (pars-base) with the modern gnome shell, pars visual configurations, and essential system utilities including greeter, pars about, pars update, software center, and image writer.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-desktop-gnome</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux GNOME Desktop Metapackage This metapackage installs the complete Pars Linux GNOME desktop environment. It connects the core system foundation (pars-base) with the modern GNOME Shell, Pars visual configurations, and essential system utilities including Greeter, Pars About, Pars Update, Software Center, and Image Writer.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 1.2 KB</span>
+                    <a href="pool/main/p/pars-desktop-gnome/pars-desktop-gnome_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-dev" data-desc="pars linux geliştirici meta paketi (tüm dev rolü) pars linux için modern yazılım geliştirme ortamını (git, vs codium, docker, dbeaver) sağlayan üst meta pakettir. . modüler alt bileşenler: - pars-dev-git - pars-dev-codium - pars-dev-docker - pars-dev-dbeaver">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-dev</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Geliştirici Meta Paketi (Tüm Dev Rolü) Pars Linux için modern yazılım geliştirme ortamını (Git, VS Codium, Docker, DBeaver) sağlayan üst meta pakettir. . Modüler alt bileşenler: - pars-dev-git - pars-dev-codium - pars-dev-docker - pars-dev-dbeaver</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.9 KB</span>
+                    <a href="pool/main/p/pars-dev/pars-dev_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-dev-codium" data-desc="pars linux geliştirici modülü - vs codium telemetriden arındırılmış, açık kaynak kodlu visual studio code ikili dağıtımı (vscodium) entegrasyonu.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-dev-codium</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Geliştirici Modülü - VS Codium Telemetriden arındırılmış, açık kaynak kodlu Visual Studio Code ikili dağıtımı (VSCodium) entegrasyonu.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-dev-codium/pars-dev-codium_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-dev-dbeaver" data-desc="pars linux geliştirici modülü - dbeaver universal db client postgresql, mysql, sqlite, oracle ve birçok veritabanı yönetimini destekleyen evrensel açık kaynak sql istemcisi.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-dev-dbeaver</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Geliştirici Modülü - DBeaver Universal DB Client PostgreSQL, MySQL, SQLite, Oracle ve birçok veritabanı yönetimini destekleyen evrensel açık kaynak SQL istemcisi.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-dev-dbeaver/pars-dev-dbeaver_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-dev-docker" data-desc="pars linux geliştirici modülü - docker & konteyner docker engine ve docker compose geliştirici ortamı. kurulum sonrası kullanıcı izinleri ve servis konfigürasyonunu yönetir.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-dev-docker</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Geliştirici Modülü - Docker & Konteyner Docker Engine ve Docker Compose geliştirici ortamı. Kurulum sonrası kullanıcı izinleri ve servis konfigürasyonunu yönetir.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 1.0 KB</span>
+                    <a href="pool/main/p/pars-dev-docker/pars-dev-docker_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-dev-git" data-desc="pars linux geliştirici modülü - git & vcs git versiyon kontrol sistemi, git large file storage (lfs) ve yardımcı geliştirici araçlarını içerir.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-dev-git</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Geliştirici Modülü - Git & VCS Git versiyon kontrol sistemi, Git Large File Storage (LFS) ve yardımcı geliştirici araçlarını içerir.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-dev-git/pars-dev-git_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-gaming" data-desc="pars linux oyun meta paketi (tüm oyun rolü) pars linux için oyun ekosistemini (steam, lutris, heroic, gamemode, mangohud) tek seferde veya modüler olarak sağlayan üst meta pakettir. . modüler alt bileşenler: - pars-gaming-steam - pars-gaming-lutris - pars-gaming-heroic - pars-gaming-gamemode - pars-gaming-mangohud">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-gaming</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Oyun Meta Paketi (Tüm Oyun Rolü) Pars Linux için oyun ekosistemini (Steam, Lutris, Heroic, GameMode, MangoHud) tek seferde veya modüler olarak sağlayan üst meta pakettir. . Modüler alt bileşenler: - pars-gaming-steam - pars-gaming-lutris - pars-gaming-heroic - pars-gaming-gamemode - pars-gaming-mangohud</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.9 KB</span>
+                    <a href="pool/main/p/pars-gaming/pars-gaming_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-gaming-gamemode" data-desc="pars linux oyun modülü - gamemode feral gamemode arka plan servisi ile işlemci frekansı, gpu performansı ve i/o önceliklerini oyun esnasında dinamik olarak optimize eder.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-gaming-gamemode</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Oyun Modülü - GameMode Feral GameMode arka plan servisi ile işlemci frekansı, GPU performansı ve I/O önceliklerini oyun esnasında dinamik olarak optimize eder.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-gaming-gamemode/pars-gaming-gamemode_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-gaming-heroic" data-desc="pars linux oyun modülü - heroic games launcher epic games, gog ve amazon prime oyunlarını yönetmek için açık kaynaklı heroic games launcher entegrasyonu.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-gaming-heroic</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Oyun Modülü - Heroic Games Launcher Epic Games, GOG ve Amazon Prime oyunlarını yönetmek için açık kaynaklı Heroic Games Launcher entegrasyonu.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-gaming-heroic/pars-gaming-heroic_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-gaming-lutris" data-desc="pars linux oyun modülü - lutris açık kaynaklı oyun yönetim platformu lutris ve wine araçlarını sağlayan modüler oyun meta paketi.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-gaming-lutris</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Oyun Modülü - Lutris Açık kaynaklı oyun yönetim platformu Lutris ve WINE araçlarını sağlayan modüler oyun meta paketi.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-gaming-lutris/pars-gaming-lutris_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-gaming-mangohud" data-desc="pars linux oyun modülü - mangohud vulkan ve opengl oyunlarında fps, sıcaklık, cpu/gpu kullanımı ve kare zamanlamalarını ekranda gösteren performans katmanı.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-gaming-mangohud</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Oyun Modülü - MangoHud Vulkan ve OpenGL oyunlarında FPS, sıcaklık, CPU/GPU kullanımı ve kare zamanlamalarını ekranda gösteren performans katmanı.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-gaming-mangohud/pars-gaming-mangohud_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-gaming-steam" data-desc="pars linux oyun modülü - steam valve steam istemcisi ve kontrolcü donanım kurallarını içeren granüler oyun modülü meta paketi.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-gaming-steam</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Oyun Modülü - Steam Valve Steam istemcisi ve kontrolcü donanım kurallarını içeren granüler oyun modülü meta paketi.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/pars-gaming-steam/pars-gaming-steam_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-mycomputer" data-desc="pars my computer - ui for disk information and management my computer, modern user interface for disk information and management.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-mycomputer</div>
+                        <div class="pkg-version">v0.8.2</div>
+                    </div>
+                    <div class="pkg-desc">Pars My Computer - UI for disk information and management My Computer, modern user interface for disk information and management.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 220.7 KB</span>
+                    <a href="pool/main/p/pars-mycomputer/pars-mycomputer_0.8.2_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="pars-setup" data-desc="parslinux os kurulum sihirbazı parslinux 26.04 lts ve modern linux dağıtımları için libadwaita ve gtk4 tabanlı, pardus ve calamares standartlarında işletim sistemi kurulum sihirbazı.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">pars-setup</div>
+                        <div class="pkg-version">v26.04.1</div>
+                    </div>
+                    <div class="pkg-desc">ParsLinux OS Kurulum Sihirbazı ParsLinux 26.04 LTS ve modern Linux dağıtımları için Libadwaita ve GTK4 tabanlı, Pardus ve Calamares standartlarında işletim sistemi kurulum sihirbazı.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 293.5 KB</span>
+                    <a href="pool/main/p/pars-setup/pars-setup_26.04.1_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="parslinux-boot-repair" data-desc="pars linux boot and system repair tool pars linux boot repair provides graphical and automated tools to repair damaged grub and efi bootloaders, perform filesystem checks (ext4, btrfs), chroot into installed rootfs systems, reset user passwords, and fix broken apt packages.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">parslinux-boot-repair</div>
+                        <div class="pkg-version">v1.2.0-parslinux1</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux boot and system repair tool Pars Linux Boot Repair provides graphical and automated tools to repair damaged GRUB and EFI bootloaders, perform filesystem checks (ext4, btrfs), chroot into installed rootfs systems, reset user passwords, and fix broken APT packages.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 60.0 KB</span>
+                    <a href="pool/main/p/parslinux-boot-repair/parslinux-boot-repair_1.2.0-parslinux1_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="parslinux-editor" data-desc="modern lightweight text editor full description for parslinux-editor on pars linux.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">parslinux-editor</div>
+                        <div class="pkg-version">v2.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Modern lightweight text editor Full description for parslinux-editor on Pars Linux.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 1.0 KB</span>
+                    <a href="pool/main/p/parslinux-editor/parslinux-editor_2.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="parslinux-gnome-settings" data-desc="default settings for the pars linux gnome desktop this package contains the default settings used by pars linux.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">parslinux-gnome-settings</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">default settings for the Pars Linux GNOME desktop This package contains the default settings used by Pars Linux.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 38.1 KB</span>
+                    <a href="pool/main/p/parslinux-gnome-settings/parslinux-gnome-settings_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="parslinux-hello" data-desc="pars linux hello test package a test debian package to demonstrate parslinux-package-installer. it includes test files and dependency specifications.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">parslinux-hello</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Hello Test Package A test Debian package to demonstrate parslinux-package-installer. It includes test files and dependency specifications.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.8 KB</span>
+                    <a href="pool/main/p/parslinux-hello/parslinux-hello_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="parslinux-menus" data-desc="parslinux xdg menus and desktop categories this package provides standard freedesktop.org (xdg) menu definitions, desktop directory files and category icons for parslinux desktop environments. . it adds the dedicated "pars araçları" (pars tools) application category in gnome, xfce, kde, cinnamon, mate, and other compatible desktops.version: 2026.1">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">parslinux-menus</div>
+                        <div class="pkg-version">v2026.1</div>
+                    </div>
+                    <div class="pkg-desc">ParsLinux XDG Menus and desktop categories This package provides standard FreeDesktop.org (XDG) menu definitions, desktop directory files and category icons for ParsLinux desktop environments. . It adds the dedicated "Pars Araçları" (Pars Tools) application category in GNOME, XFCE, KDE, Cinnamon, MATE, and other compatible desktops.Version: 2026.1</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 101.4 KB</span>
+                    <a href="pool/main/p/parslinux-menus/parslinux-menus_2026.1_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="parslinux-nvidia-installer" data-desc="parslinux nvidia graphics driver installer and gpu manager a graphical tool that helps you install and manage nvidia gpu drivers on parslinux. it detects your hardware, suggests fitting proprietary or open-source drivers, integrates official repositories, and manages secondary gpus on hybrid laptops.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">parslinux-nvidia-installer</div>
+                        <div class="pkg-version">v1.0.0-1</div>
+                    </div>
+                    <div class="pkg-desc">ParsLinux NVIDIA graphics driver installer and GPU manager A graphical tool that helps you install and manage NVIDIA GPU drivers on ParsLinux. It detects your hardware, suggests fitting proprietary or open-source drivers, integrates official repositories, and manages secondary GPUs on hybrid laptops.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 70.9 KB</span>
+                    <a href="pool/main/p/parslinux-nvidia-installer/parslinux-nvidia-installer_1.0.0-1_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="parslinux-shortcuts" data-desc="pars linux keyboard shortcuts guide pars linux shortcuts guide and greeter companion application that shows keyboard shortcuts categorized with search and visual key combinations.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">parslinux-shortcuts</div>
+                        <div class="pkg-version">v0.1.0</div>
+                    </div>
+                    <div class="pkg-desc">Pars Linux Keyboard Shortcuts Guide Pars Linux shortcuts guide and greeter companion application that shows keyboard shortcuts categorized with search and visual key combinations.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 2.4 MB</span>
+                    <a href="pool/main/p/parslinux-shortcuts/parslinux-shortcuts_0.1.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+            <div class="pkg-card" data-name="parslinux-theme" data-desc="official dark theme for pars linux full description for parslinux-theme on pars linux.">
+                <div>
+                    <div class="pkg-header">
+                        <div class="pkg-name">parslinux-theme</div>
+                        <div class="pkg-version">v1.0.0</div>
+                    </div>
+                    <div class="pkg-desc">Official dark theme for Pars Linux Full description for parslinux-theme on Pars Linux.</div>
+                </div>
+                <div class="pkg-meta">
+                    <span>Mimari: all • 0.9 KB</span>
+                    <a href="pool/main/p/parslinux-theme/parslinux-theme_1.0.0_all.deb" class="dl-btn" download>
+                        <span>⬇</span> .deb İndir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 ParsLinux Geliştirici Ekibi. Açık kaynaklı ve özgür yazılım lisanslarıyla geliştirilmiştir.</p>
+            <p style="margin-top: 0.5rem;"><a href="https://github.com/parslinux" target="_blank">GitHub Organizasyonumuz</a> • <a href="dists/bookworm/main/binary-amd64/Packages.gz">Packages.gz İndir</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function copyCommand() {
+            const cmd = 'echo "deb [trusted=yes] https://parslinux.github.io/apt_repo bookworm main" | sudo tee /etc/apt/sources.list.d/parslinux.list\nsudo apt update';
+            navigator.clipboard.writeText(cmd).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerText = 'Kopyalandı! ✓';
+                setTimeout(() => btn.innerText = 'Kopyala', 2000);
+            });
+        }
+
+        function filterPackages() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const cards = document.querySelectorAll('.pkg-card');
+            let count = 0;
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                const desc = card.getAttribute('data-desc');
+                if (name.includes(query) || desc.includes(query)) {
+                    card.style.display = 'flex';
+                    count++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            document.getElementById('pkg-count').innerText = count;
+        }
+    </script>
+</body>
+</html>

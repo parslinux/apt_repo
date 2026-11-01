@@ -308,11 +308,23 @@
             <div class="setup-title">
                 <span>⚡</span> Depoyu Sisteminize Ekleyin
             </div>
-            <p style="color: var(--text-muted); font-size: 0.95rem;">ParsLinux 0.1 veya Debian Bookworm sisteminizde terminali açıp şu komutları çalıştırmanız yeterlidir:</p>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">ParsLinux veya Debian Bookworm sisteminizde depoyu güvenle kurmak için tercih ettiğiniz yöntemi seçin:</p>
             
-            <div class="code-block">
-                <button class="copy-btn" onclick="copyCommand()">Kopyala</button>
-                <code id="setup-cmd">echo "deb [trusted=yes] https://parslinux.github.io/apt_repo 0.1 main" | sudo tee /etc/apt/sources.list.d/parslinux.list<br>sudo apt update</code>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                <button id="tab-signed" onclick="switchSetupTab('signed')" style="background: var(--primary); border: 1px solid var(--primary); color: #fff; padding: 0.4rem 0.9rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem; font-weight: 600;">🔐 GPG Doğrulamalı (Önerilen)</button>
+                <button id="tab-wkd" onclick="switchSetupTab('wkd')" style="background: var(--surface); border: 1px solid var(--surface-border); color: var(--text-muted); padding: 0.4rem 0.9rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem; font-weight: 600;">🌐 Web Key Directory (WKD)</button>
+                <button id="tab-fast" onclick="switchSetupTab('fast')" style="background: var(--surface); border: 1px solid var(--surface-border); color: var(--text-muted); padding: 0.4rem 0.9rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem; font-weight: 600;">⚡ Hızlı Test (Trusted)</button>
+            </div>
+
+            <div class="code-block" style="position: relative;">
+                <button class="copy-btn" onclick="copyCurrentSetupCommand()">Kopyala</button>
+                <code id="setup-cmd"># 1. GPG Anahtarını indirin ve keyring dizinine ekleyin:
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://parslinux.github.io/apt_repo/parslinux-archive-keyring.gpg | sudo tee /etc/apt/keyrings/parslinux-archive-keyring.gpg > /dev/null
+
+# 2. ParsLinux deposunu ekleyin ve güncelleyin:
+echo "deb [signed-by=/etc/apt/keyrings/parslinux-archive-keyring.gpg] https://parslinux.github.io/apt_repo 0.1 main" | sudo tee /etc/apt/sources.list.d/parslinux.list
+sudo apt update</code>
             </div>
         </section>
 
@@ -802,9 +814,55 @@
     </div>
 
     <script>
-        function copyCommand() {
-            const cmd = 'echo "deb [trusted=yes] https://parslinux.github.io/apt_repo 0.1 main" | sudo tee /etc/apt/sources.list.d/parslinux.list\nsudo apt update';
-            navigator.clipboard.writeText(cmd).then(() => {
+        const setupSnippets = {
+            signed: `# 1. GPG Anahtarını indirin ve keyring dizinine ekleyin:
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://parslinux.github.io/apt_repo/parslinux-archive-keyring.gpg | sudo tee /etc/apt/keyrings/parslinux-archive-keyring.gpg > /dev/null
+
+# 2. ParsLinux deposunu ekleyin ve güncelleyin:
+echo "deb [signed-by=/etc/apt/keyrings/parslinux-archive-keyring.gpg] https://parslinux.github.io/apt_repo 0.1 main" | sudo tee /etc/apt/sources.list.d/parslinux.list
+sudo apt update`,
+
+            wkd: `# 1. Web Key Directory (WKD RFC 9580) ile anahtarı çekin:
+sudo mkdir -p /etc/apt/keyrings
+gpg --locate-keys repo@parslinux.org && gpg --export repo@parslinux.org | sudo gpg --dearmor --yes -o /etc/apt/keyrings/parslinux-archive-keyring.gpg
+
+# 2. Depo kaynağını ekleyin ve güncelleyin:
+echo "deb [signed-by=/etc/apt/keyrings/parslinux-archive-keyring.gpg] https://parslinux.github.io/apt_repo 0.1 main" | sudo tee /etc/apt/sources.list.d/parslinux.list
+sudo apt update`,
+
+            fast: `# Hızlı Kurulum (GPG doğrulama atlanır):
+echo "deb [trusted=yes] https://parslinux.github.io/apt_repo 0.1 main" | sudo tee /etc/apt/sources.list.d/parslinux.list
+sudo apt update`
+        };
+
+        let currentTabMode = 'signed';
+
+        function switchSetupTab(mode) {
+            currentTabMode = mode;
+            ['signed', 'wkd', 'fast'].forEach(m => {
+                const btn = document.getElementById('tab-' + m);
+                if (btn) {
+                    if (m === mode) {
+                        btn.style.background = 'var(--primary)';
+                        btn.style.borderColor = 'var(--primary)';
+                        btn.style.color = '#fff';
+                    } else {
+                        btn.style.background = 'var(--surface)';
+                        btn.style.borderColor = 'var(--surface-border)';
+                        btn.style.color = 'var(--text-muted)';
+                    }
+                }
+            });
+            const codeEl = document.getElementById('setup-cmd');
+            if (codeEl) {
+                codeEl.innerText = setupSnippets[mode];
+            }
+        }
+
+        function copyCurrentSetupCommand() {
+            const snippet = setupSnippets[currentTabMode];
+            navigator.clipboard.writeText(snippet).then(() => {
                 const btn = document.querySelector('.copy-btn');
                 btn.innerText = 'Kopyalandı! ✓';
                 setTimeout(() => btn.innerText = 'Kopyala', 2000);

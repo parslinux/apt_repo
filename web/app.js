@@ -132,6 +132,10 @@ document.addEventListener('DOMContentLoaded', () => {
             currentTab = targetTab;
             if (targetTab === 'metricsTab') {
                 loadMetricsData();
+            } else if (targetTab === 'snapshotsTab') {
+                loadSnapshotsData();
+            } else if (targetTab === 'diffTab') {
+                populateDiffSelects();
             }
         });
     });
@@ -1430,6 +1434,473 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =========================================================================
+    // 12. Snapshot (Anlık Görüntü) ve Rollback Yönetimi
+    // =========================================================================
+    let allSnapshots = [];
+    let currentRollbackSnapshot = null;
+
+    const snapshotsContainer = document.getElementById('snapshotsContainer');
+    const btnRefreshSnapshots = document.getElementById('btnRefreshSnapshots');
+    const btnOpenCreateSnapshotModal = document.getElementById('btnOpenCreateSnapshotModal');
+    const snapshotCreateModal = document.getElementById('snapshotCreateModal');
+    const modalSnapCreateCloseBtn = document.getElementById('modalSnapCreateCloseBtn');
+    const modalSnapCreateCancelBtn = document.getElementById('modalSnapCreateCancelBtn');
+    const btnSubmitCreateSnapshot = document.getElementById('btnSubmitCreateSnapshot');
+    const snapCreateRepoSelect = document.getElementById('snapCreateRepoSelect');
+    const snapCreateNameInput = document.getElementById('snapCreateNameInput');
+    const snapCreateDescInput = document.getElementById('snapCreateDescInput');
+
+    const snapshotRollbackModal = document.getElementById('snapshotRollbackModal');
+    const modalSnapRollbackCloseBtn = document.getElementById('modalSnapRollbackCloseBtn');
+    const modalSnapRollbackCancelBtn = document.getElementById('modalSnapRollbackCancelBtn');
+    const btnSubmitRollback = document.getElementById('btnSubmitRollback');
+    const snapRollbackTargetName = document.getElementById('snapRollbackTargetName');
+    const snapRollbackRepoSelect = document.getElementById('snapRollbackRepoSelect');
+    const snapRollbackDistSelect = document.getElementById('snapRollbackDistSelect');
+
+    async function loadSnapshotsData() {
+        if (!snapshotsContainer) return;
+        try {
+            snapshotsContainer.innerHTML = '<div class="text-center text-muted" style="grid-column: 1 / -1; padding: 2.5rem;">Snapshot listesi taranıyor...</div>';
+            const res = await fetch('/api/snapshots');
+            const data = await res.json();
+            allSnapshots = data.snapshots || [];
+            renderSnapshots(allSnapshots);
+            populateDiffSelects();
+        } catch (err) {
+            snapshotsContainer.innerHTML = `<div class="text-center text-muted" style="grid-column: 1 / -1; padding: 2.5rem; color: #f87171;">Snapshot verisi alınamadı: ${escapeHtml(err.message)}</div>`;
+        }
+    }
+
+    function renderSnapshots(snapshots) {
+        if (!snapshotsContainer) return;
+        if (!snapshots || snapshots.length === 0) {
+            snapshotsContainer.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1; padding: 3rem; text-align: center; background: rgba(0,0,0,0.2); border: 1px dashed var(--border-color); border-radius: 12px;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📸</div>
+                    <h4 style="color: #fff; margin-bottom: 0.5rem;">Kayıtlı Snapshot Bulunmuyor</h4>
+                    <p style="color: var(--text-muted); font-size: 0.88rem; max-width: 480px; margin: 0 auto 1.5rem auto;">
+                        Deponuzun anlık durumunun değişmez bir kopyasını alarak sürüm güncellemeleri öncesinde sistemi güvenceye alabilirsiniz.
+                    </p>
+                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('btnOpenCreateSnapshotModal').click()">İlk Snapshot'ı Al</button>
+                </div>
+            `;
+            return;
+        }
+
+        snapshotsContainer.innerHTML = snapshots.map(snap => `
+            <div class="snapshot-card">
+                <div>
+                    <div class="snapshot-card-top">
+                        <div class="snapshot-title">${escapeHtml(snap.name)}</div>
+                        <span class="badge badge-emerald">${snap.package_count || 0} Paket</span>
+                    </div>
+                    <div class="snapshot-meta-row">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>${escapeHtml(snap.created_at || 'Tarih bilinmiyor')}</span>
+                    </div>
+                    <div class="snapshot-desc" style="margin-top: 0.75rem;">
+                        ${escapeHtml(snap.description || 'Snapshot açıklaması girilmemiş.')}
+                    </div>
+                </div>
+                <div class="snapshot-actions">
+                    <button class="btn btn-primary btn-sm" onclick="window.triggerSnapshotRollback('${escapeHtml(snap.name)}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                        <span>Rollback</span>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="window.triggerSnapshotDiff('${escapeHtml(snap.name)}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <span>Diff</span>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;" onclick="window.triggerSnapshotDrop('${escapeHtml(snap.name)}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Sil</span>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.triggerSnapshotRollback = function(snapName) {
+        currentRollbackSnapshot = snapName;
+        if (snapRollbackTargetName) snapRollbackTargetName.textContent = snapName;
+        if (snapshotRollbackModal) snapshotRollbackModal.classList.add('active');
+    };
+
+    window.triggerSnapshotDiff = function(snapName) {
+        const diffTabBtn = document.getElementById('tabBtnDiff');
+        if (diffTabBtn) diffTabBtn.click();
+        const diffModeSnapBtn = document.getElementById('diffModeSnapBtn');
+        if (diffModeSnapBtn) diffModeSnapBtn.click();
+        if (diffSnap1Select) diffSnap1Select.value = snapName;
+    };
+
+    window.triggerSnapshotDrop = async function(snapName) {
+        if (!confirm(`'${snapName}' anlık görüntüsünü silmek istediğinize emin misiniz?`)) return;
+        try {
+            const res = await fetch('/api/snapshot/drop', {
+                method: 'POST',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ name: snapName })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showToast(`'${snapName}' snapshot'ı başarıyla silindi.`);
+                loadSnapshotsData();
+            } else {
+                showToast('Hata: ' + (data.error || 'Silme başarısız'));
+            }
+        } catch (err) {
+            showToast('Hata: ' + err.message);
+        }
+    };
+
+    if (btnRefreshSnapshots) {
+        btnRefreshSnapshots.addEventListener('click', () => {
+            loadSnapshotsData();
+            showToast('Snapshot listesi güncellendi.');
+        });
+    }
+
+    if (btnOpenCreateSnapshotModal) {
+        btnOpenCreateSnapshotModal.addEventListener('click', () => {
+            const d = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const ts = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+            if (snapCreateNameInput) snapCreateNameInput.value = `snap_parslinux_${ts}`;
+            if (snapCreateDescInput) snapCreateDescInput.value = '';
+            if (snapshotCreateModal) snapshotCreateModal.classList.add('active');
+        });
+    }
+
+    if (modalSnapCreateCloseBtn) modalSnapCreateCloseBtn.addEventListener('click', () => snapshotCreateModal.classList.remove('active'));
+    if (modalSnapCreateCancelBtn) modalSnapCreateCancelBtn.addEventListener('click', () => snapshotCreateModal.classList.remove('active'));
+
+    if (btnSubmitCreateSnapshot) {
+        btnSubmitCreateSnapshot.addEventListener('click', async () => {
+            const repo = snapCreateRepoSelect ? snapCreateRepoSelect.value : 'parslinux';
+            const name = snapCreateNameInput ? snapCreateNameInput.value.trim() : '';
+            const desc = snapCreateDescInput ? snapCreateDescInput.value.trim() : '';
+            btnSubmitCreateSnapshot.disabled = true;
+            btnSubmitCreateSnapshot.textContent = 'Oluşturuluyor...';
+            try {
+                const res = await fetch('/api/snapshot/create', {
+                    method: 'POST',
+                    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({ repo, name, description: desc })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Snapshot oluşturuldu!');
+                    if (snapshotCreateModal) snapshotCreateModal.classList.remove('active');
+                    loadSnapshotsData();
+                } else {
+                    showToast('Hata: ' + (data.error || 'Oluşturulamadı'));
+                }
+            } catch (err) {
+                showToast('Hata: ' + err.message);
+            } finally {
+                btnSubmitCreateSnapshot.disabled = false;
+                btnSubmitCreateSnapshot.textContent = 'Snapshot Oluştur';
+            }
+        });
+    }
+
+    if (modalSnapRollbackCloseBtn) modalSnapRollbackCloseBtn.addEventListener('click', () => snapshotRollbackModal.classList.remove('active'));
+    if (modalSnapRollbackCancelBtn) modalSnapRollbackCancelBtn.addEventListener('click', () => snapshotRollbackModal.classList.remove('active'));
+
+    if (btnSubmitRollback) {
+        btnSubmitRollback.addEventListener('click', async () => {
+            if (!currentRollbackSnapshot) return;
+            const repo = snapRollbackRepoSelect ? snapRollbackRepoSelect.value : 'parslinux';
+            const dist = snapRollbackDistSelect ? snapRollbackDistSelect.value : 'bookworm';
+            btnSubmitRollback.disabled = true;
+            btnSubmitRollback.textContent = 'Geri Yükleniyor...';
+            try {
+                const res = await fetch('/api/snapshot/rollback', {
+                    method: 'POST',
+                    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({ snapshot: currentRollbackSnapshot, repo, distribution: dist })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || 'Depo başarıyla geri yüklendi!');
+                    if (snapshotRollbackModal) snapshotRollbackModal.classList.remove('active');
+                    loadDashboardData();
+                    loadSnapshotsData();
+                } else {
+                    showToast('Rollback Hatası: ' + (data.error || 'İşlem başarısız'));
+                }
+            } catch (err) {
+                showToast('Hata: ' + err.message);
+            } finally {
+                btnSubmitRollback.disabled = false;
+                btnSubmitRollback.textContent = '↺ Geri Yüklemeyi Başlat';
+            }
+        });
+    }
+
+    // =========================================================================
+    // 13. Paket & Sürüm Diff Karşılaştırıcı
+    // =========================================================================
+    const diffModePkgBtn = document.getElementById('diffModePkgBtn');
+    const diffModeSnapBtn = document.getElementById('diffModeSnapBtn');
+    const diffPkgSection = document.getElementById('diffPkgSection');
+    const diffSnapSection = document.getElementById('diffSnapSection');
+    const diffPkg1Select = document.getElementById('diffPkg1Select');
+    const diffPkg2Select = document.getElementById('diffPkg2Select');
+    const btnExecutePkgDiff = document.getElementById('btnExecutePkgDiff');
+    const diffSnap1Select = document.getElementById('diffSnap1Select');
+    const diffSnap2Select = document.getElementById('diffSnap2Select');
+    const btnExecuteSnapDiff = document.getElementById('btnExecuteSnapDiff');
+    const diffResultsContainer = document.getElementById('diffResultsContainer');
+
+    if (diffModePkgBtn && diffModeSnapBtn) {
+        diffModePkgBtn.addEventListener('click', () => {
+            diffModePkgBtn.classList.add('active');
+            diffModeSnapBtn.classList.remove('active');
+            if (diffPkgSection) diffPkgSection.style.display = 'block';
+            if (diffSnapSection) diffSnapSection.style.display = 'none';
+        });
+        diffModeSnapBtn.addEventListener('click', () => {
+            diffModeSnapBtn.classList.add('active');
+            diffModePkgBtn.classList.remove('active');
+            if (diffPkgSection) diffPkgSection.style.display = 'none';
+            if (diffSnapSection) diffSnapSection.style.display = 'block';
+        });
+    }
+
+    function populateDiffSelects() {
+        if (diffPkg1Select && diffPkg2Select && allPackages && allPackages.length > 0) {
+            const current1 = diffPkg1Select.value;
+            const current2 = diffPkg2Select.value;
+            const options = allPackages.map(p => `<option value="${escapeHtml(p.name)}:${escapeHtml(p.version)}">${escapeHtml(p.name)} (v${escapeHtml(p.version)})</option>`).join('');
+            diffPkg1Select.innerHTML = `<option value="">Paket seçin...</option>` + options;
+            diffPkg2Select.innerHTML = `<option value="">Karşılaştırılacak paket seçin...</option>` + options;
+            if (current1) diffPkg1Select.value = current1;
+            if (current2) diffPkg2Select.value = current2;
+        }
+
+        if (diffSnap1Select && diffSnap2Select && allSnapshots) {
+            const currentS1 = diffSnap1Select.value;
+            const currentS2 = diffSnap2Select.value;
+            const sOptions = allSnapshots.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)} (${s.package_count || 0} paket)</option>`).join('');
+            diffSnap1Select.innerHTML = `<option value="">Snapshot seçin...</option>` + sOptions;
+            diffSnap2Select.innerHTML = `<option value="">Snapshot seçin...</option>` + sOptions;
+            if (currentS1) diffSnap1Select.value = currentS1;
+            if (currentS2) diffSnap2Select.value = currentS2;
+        }
+    }
+
+    if (btnExecutePkgDiff) {
+        btnExecutePkgDiff.addEventListener('click', async () => {
+            const val1 = diffPkg1Select ? diffPkg1Select.value : '';
+            const val2 = diffPkg2Select ? diffPkg2Select.value : '';
+            if (!val1 || !val2) {
+                showToast('Lütfen karşılaştırmak için iki paket seçin.');
+                return;
+            }
+            const [p1, v1] = val1.split(':');
+            const [p2, v2] = val2.split(':');
+
+            if (diffResultsContainer) {
+                diffResultsContainer.style.display = 'block';
+                diffResultsContainer.innerHTML = '<div class="text-center text-muted" style="padding: 2.5rem;">Paket arşivleri ayrıştırılıyor ve farklar hesaplanıyor...</div>';
+            }
+
+            try {
+                const res = await fetch(`/api/package/diff?pkg1=${encodeURIComponent(p1)}&ver1=${encodeURIComponent(v1 || '')}&pkg2=${encodeURIComponent(p2)}&ver2=${encodeURIComponent(v2 || '')}`);
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    diffResultsContainer.innerHTML = `<div class="text-center" style="padding: 2.5rem; color: #f87171;">Fark hesaplanamadı: ${escapeHtml(data.error || 'Bilinmeyen hata')}</div>`;
+                    return;
+                }
+                renderPackageDiffResults(data);
+            } catch (err) {
+                diffResultsContainer.innerHTML = `<div class="text-center" style="padding: 2.5rem; color: #f87171;">Hata: ${escapeHtml(err.message)}</div>`;
+            }
+        });
+    }
+
+    function renderPackageDiffResults(data) {
+        if (!diffResultsContainer) return;
+        const p1 = data.pkg1 || {};
+        const p2 = data.pkg2 || {};
+        const ctrlDiff = data.control_diff || [];
+        const fileDiff = data.file_diff || [];
+
+        diffResultsContainer.innerHTML = `
+            <div class="diff-summary-grid">
+                <div class="diff-summary-card">
+                    <div class="diff-summary-title">Paket A (Kaynak)</div>
+                    <div style="font-weight: 700; color: #fff; font-size: 1.05rem;">${escapeHtml(p1.name)} <span class="badge badge-primary">v${escapeHtml(p1.version)}</span></div>
+                    <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.35rem;">Boyut: ${formatBytes(p1.size || 0)} • ${p1.files_count || 0} Dosya</div>
+                </div>
+                <div class="diff-summary-card">
+                    <div class="diff-summary-title">Paket B (Hedef)</div>
+                    <div style="font-weight: 700; color: #fff; font-size: 1.05rem;">${escapeHtml(p2.name)} <span class="badge badge-primary">v${escapeHtml(p2.version)}</span></div>
+                    <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.35rem;">Boyut: ${formatBytes(p2.size || 0)} • ${p2.files_count || 0} Dosya</div>
+                </div>
+                <div class="diff-summary-card">
+                    <div class="diff-summary-title">Değişiklik Özeti</div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.4rem; flex-wrap: wrap;">
+                        <span class="diff-badge-add">+${fileDiff.filter(f => f.status === 'added').length} Eklendi</span>
+                        <span class="diff-badge-del">-${fileDiff.filter(f => f.status === 'removed').length} Silindi</span>
+                        <span class="diff-badge-mod">!${fileDiff.filter(f => f.status === 'modified').length} Değişti</span>
+                        <span class="badge badge-secondary">${data.unchanged_files_count || 0} Aynı</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Farkları Tablosu -->
+            <div style="margin-bottom: 2rem;">
+                <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    📄 Debian Control Alan Farkları (${ctrlDiff.length})
+                </h4>
+                ${ctrlDiff.length === 0 ? '<div class="text-muted" style="font-size: 0.85rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px;">Control alanları tamamen özdeş.</div>' : `
+                    <div class="diff-table-container">
+                        <table class="diff-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 140px;">Alan</th>
+                                    <th>Kaynak (A)</th>
+                                    <th>Hedef (B)</th>
+                                    <th style="width: 100px;">Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${ctrlDiff.map(c => `
+                                    <tr class="${c.status === 'added' ? 'diff-row-added' : (c.status === 'removed' ? 'diff-row-removed' : 'diff-row-modified')}">
+                                        <td style="font-weight: 600; color: #fff;">${escapeHtml(c.field)}</td>
+                                        <td style="color: var(--text-muted); word-break: break-all;">${escapeHtml(c.val1)}</td>
+                                        <td style="color: #fff; word-break: break-all;">${escapeHtml(c.val2)}</td>
+                                        <td>
+                                            <span class="${c.status === 'added' ? 'diff-badge-add' : (c.status === 'removed' ? 'diff-badge-del' : 'diff-badge-mod')}">
+                                                ${c.status === 'added' ? '+ Eklendi' : (c.status === 'removed' ? '- Silindi' : '! Değişti')}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `}
+            </div>
+
+            <!-- Dosya Ağacı Farkları Tablosu -->
+            <div>
+                <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    📁 Dosya Ağacı Değişiklikleri (${fileDiff.length})
+                </h4>
+                ${fileDiff.length === 0 ? '<div class="text-muted" style="font-size: 0.85rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px;">Dosya ağacı tamamen özdeş.</div>' : `
+                    <div class="diff-table-container">
+                        <table class="diff-table">
+                            <thead>
+                                <tr>
+                                    <th>Dosya / Dizin</th>
+                                    <th style="width: 120px;">Durum</th>
+                                    <th style="width: 140px;">Boyut (A ➔ B)</th>
+                                    <th style="width: 120px;">İzin (Mode)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${fileDiff.map(f => `
+                                    <tr class="${f.status === 'added' ? 'diff-row-added' : (f.status === 'removed' ? 'diff-row-removed' : 'diff-row-modified')}">
+                                        <td style="word-break: break-all;">${f.isdir ? '📁' : '📄'} ${escapeHtml(f.name)}</td>
+                                        <td>
+                                            <span class="${f.status === 'added' ? 'diff-badge-add' : (f.status === 'removed' ? 'diff-badge-del' : 'diff-badge-mod')}">
+                                                ${f.status === 'added' ? '+ Eklendi' : (f.status === 'removed' ? '- Silindi' : '! Değişti')}
+                                            </span>
+                                        </td>
+                                        <td style="font-size: 0.8rem; color: var(--text-secondary);">
+                                            ${f.status === 'added' ? formatBytes(f.size2 || 0) : (f.status === 'removed' ? formatBytes(f.size1 || 0) : `${formatBytes(f.size1 || 0)} ➔ ${formatBytes(f.size2 || 0)}`)}
+                                        </td>
+                                        <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(f.mode2 || f.mode1 || '-')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `}
+            </div>
+        `;
+    }
+
+    if (btnExecuteSnapDiff) {
+        btnExecuteSnapDiff.addEventListener('click', async () => {
+            const s1 = diffSnap1Select ? diffSnap1Select.value : '';
+            const s2 = diffSnap2Select ? diffSnap2Select.value : '';
+            if (!s1 || !s2) {
+                showToast('Lütfen karşılaştırmak için iki snapshot seçin.');
+                return;
+            }
+
+            if (diffResultsContainer) {
+                diffResultsContainer.style.display = 'block';
+                diffResultsContainer.innerHTML = '<div class="text-center text-muted" style="padding: 2.5rem;">Snapshot farkları hesaplanıyor...</div>';
+            }
+
+            try {
+                const res = await fetch(`/api/snapshot/diff?snap1=${encodeURIComponent(s1)}&snap2=${encodeURIComponent(s2)}`);
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    diffResultsContainer.innerHTML = `<div class="text-center" style="padding: 2.5rem; color: #f87171;">Fark hesaplanamadı: ${escapeHtml(data.error || 'Bilinmeyen hata')}</div>`;
+                    return;
+                }
+                renderSnapshotDiffResults(data);
+            } catch (err) {
+                diffResultsContainer.innerHTML = `<div class="text-center" style="padding: 2.5rem; color: #f87171;">Hata: ${escapeHtml(err.message)}</div>`;
+            }
+        });
+    }
+
+    function renderSnapshotDiffResults(data) {
+        if (!diffResultsContainer) return;
+        const diffs = data.differences || [];
+        diffResultsContainer.innerHTML = `
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                <h4 style="color: #fff; font-size: 1rem; margin-bottom: 0.5rem;">
+                    📸 Snapshot Karşılaştırması: <span style="color: var(--accent);">${escapeHtml(data.snap1)}</span> ⟷ <span style="color: #a855f7;">${escapeHtml(data.snap2)}</span>
+                </h4>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                    Toplam ${diffs.length} paket farkı tespit edildi.
+                </div>
+            </div>
+
+            ${diffs.length === 0 ? '<div class="text-center text-muted" style="padding: 3rem; background: rgba(0,0,0,0.2); border-radius: 8px;">İki snapshot arasında hiçbir paket farkı bulunmuyor (Özdeş).</div>' : `
+                <div class="diff-table-container">
+                    <table class="diff-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">İşlem</th>
+                                <th style="width: 100px;">Mimari</th>
+                                <th>Paket Adı</th>
+                                <th>Sürüm (${escapeHtml(data.snap1)})</th>
+                                <th>Sürüm (${escapeHtml(data.snap2)})</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${diffs.map(d => `
+                                <tr class="${d.action === 'added' ? 'diff-row-added' : (d.action === 'removed' ? 'diff-row-removed' : 'diff-row-modified')}">
+                                    <td>
+                                        <span class="${d.action === 'added' ? 'diff-badge-add' : (d.action === 'removed' ? 'diff-badge-del' : 'diff-badge-mod')}">
+                                            ${d.action === 'added' ? '+ Eklendi' : (d.action === 'removed' ? '- Kaldırıldı' : '! Değişti')}
+                                        </span>
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 0.8rem;">${escapeHtml(d.arch)}</td>
+                                    <td style="font-weight: 600; color: #fff;">${escapeHtml(d.package)}</td>
+                                    <td style="color: var(--text-muted);">${escapeHtml(d.version_a || '-')}</td>
+                                    <td style="color: #38bdf8; font-weight: 600;">${escapeHtml(d.version_b || '-')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `}
+        `;
+    }
+
     // Başlat
     updateSetupCommands();
     loadDashboardData();
@@ -1437,5 +1908,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWkdStatus();
     loadAuthStatus();
     loadMetricsData();
+    loadSnapshotsData();
 });
 

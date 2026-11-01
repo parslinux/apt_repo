@@ -118,9 +118,24 @@ Bu belge, APT Depo Yönetim Projesi'nin mevcut durumunu, tamamlanan adımların�
 
 ---
 
+- [x] **📸 Aptly Snapshot (Anlık Görüntü) & Rollback Yönetimi:**
+  - CLI ve betik otomasyonu: `scripts/09_manage_snapshots.sh` eklendi (`list`, `create`, `rollback`, `diff`, `drop`).
+  - Terminal ana kontrol konsoluna (`manage.sh`) Seçenek 17 (Snapshot & Rollback) entegre edildi.
+  - Web API uç noktaları eklendi: `GET /api/snapshots`, `POST /api/snapshot/create`, `POST /api/snapshot/rollback`, `POST /api/snapshot/drop`.
+  - Web kontrol paneline **"Snapshot & Rollback"** sekmesi, cam efektli snapshot kartları, paket sayaçları ve tek tıkla geri yükleme (rollback) sihirbazı eklendi.
+- [x] **🔍 Paket & Sürüm Karşılaştırma Aracı (Diff Inspector):**
+  - İki farklı `.deb` paketinin veya sürümünün Debian `control` alan farklarını (Depends, Breaks, Conflicts, Sürüm, vb.) tespit eden analiz motoru.
+  - Paket içi dosya ağacı farklarını (Eklenen `+`, Silinen `-`, Değişen `!`) izinler ve dosya boyutlarıyla listeleyen saf Python arşiv karşılaştırıcı (`/api/package/diff`).
+  - İki Aptly snapshot'ı arasındaki paket değişikliklerini analiz eden tablo motoru (`/api/snapshot/diff`).
+  - Web paneline **"Diff Karşılaştırıcı"** sekmesi: Paketler arası ve Snapshot'lar arası geçişli çift modlu modern arayüz.
+
+---
+
 ## 🔮 Gelecek İyileştirmeler (Genişletme Fikirleri)
 
-- [ ] **Aptly Snapshot & Rollback Arayüzü:** Web paneli üzerinden anlık depo snapshot'ı alma ve önceki sürümlere tek tıkla geri dönebilme.
-- [ ] **Paket Karşılaştırma Aracı (Diff Inspector):** Aynı paketin farklı iki sürümü arasındaki control ve dosya ağacı farklarını görselleştirme.
+- [ ] **Paket İndirme İstemci Coğrafi Dağılımı (GeoIP):** İndirmelerin hangi ülke/şehirlerden yapıldığını gösteren IP analitiği.
+- [ ] **Otomatik Debian Changelog Üretici:** Yapılan değişikliklerden otomatik `debian/changelog` oluşturan araç.
+- [ ] **Snapshot Zamanlanmış Yedekleme (Auto-Snapshot Cron):** Her paket yükleme öncesinde otomatik snapshot alma seçeneği.
+
 
 

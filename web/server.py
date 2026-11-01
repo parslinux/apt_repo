@@ -332,6 +332,162 @@ def get_repos_info():
             })
     return repos
 
+def get_snapshots_info():
+    """Tüm Aptly snapshot'larını listeler."""
+    snapshots = []
+    raw_list = run_cmd([str(APTLY_BIN), "snapshot", "list", "-raw"])
+    if not raw_list:
+        return snapshots
+    
+    for s_name in raw_list.splitlines():
+        s_name = s_name.strip()
+        if not s_name:
+            continue
+        show_out = run_cmd([str(APTLY_BIN), "snapshot", "show", s_name])
+        created_at = ""
+        description = ""
+        pkg_count = 0
+        for line in show_out.splitlines():
+            if line.startswith("Created At:"):
+                created_at = line.split(":", 1)[1].strip()
+            elif line.startswith("Description:"):
+                description = line.split(":", 1)[1].strip()
+            elif line.startswith("Number of packages:"):
+                try:
+                    pkg_count = int(line.split(":", 1)[1].strip())
+                except Exception:
+                    pkg_count = 0
+        snapshots.append({
+            "name": s_name,
+            "created_at": created_at,
+            "description": description,
+            "package_count": pkg_count
+        })
+    return snapshots
+
+def parse_snapshot_diff(snap1, snap2):
+    """İki snapshot arasındaki diff çıktısını ayrıştırır."""
+    out = run_cmd([str(APTLY_BIN), "snapshot", "diff", snap1, snap2])
+    results = []
+    if not out:
+        return results
+    for line in out.splitlines():
+        line = line.strip()
+        if not line or line.startswith("Arch") or line.startswith("---") or "successfully" in line:
+            continue
+        parts = [p.strip() for p in line.split("|")]
+        if len(parts) >= 4:
+            arch_col = parts[0]
+            action = "changed"
+            if arch_col.startswith("+"):
+                action = "added"
+                arch = arch_col[1:].strip()
+            elif arch_col.startswith("-"):
+                action = "removed"
+                arch = arch_col[1:].strip()
+            elif arch_col.startswith("!"):
+                action = "modified"
+                arch = arch_col[1:].strip()
+            else:
+                arch = arch_col.strip()
+            
+            pkg_name = parts[1]
+            ver_a = parts[2]
+            ver_b = parts[3]
+            results.append({
+                "action": action,
+                "arch": arch,
+                "package": pkg_name,
+                "version_a": ver_a,
+                "version_b": ver_b
+            })
+    return results
+
+def compare_package_data(data1, data2):
+    """İki Debian paketinin control ve dosya ağacını karşılaştırır."""
+    if not data1.get("success") or not data2.get("success"):
+        return {"success": False, "error": "Paketlerden biri veya her ikisi okunamadı."}
+
+    def parse_ctrl(txt):
+        res = {}
+        for line in txt.splitlines():
+            if ":" in line and not line.startswith(" "):
+                k, v = line.split(":", 1)
+                res[k.strip().lower()] = v.strip()
+        return res
+
+    ctrl1 = parse_ctrl(data1.get("control", ""))
+    ctrl2 = parse_ctrl(data2.get("control", ""))
+    all_keys = sorted(set(ctrl1.keys()) | set(ctrl2.keys()))
+    control_diff = []
+    for k in all_keys:
+        v1 = ctrl1.get(k)
+        v2 = ctrl2.get(k)
+        if v1 != v2:
+            control_diff.append({
+                "field": k.capitalize(),
+                "val1": v1 or "(tanımsız)",
+                "val2": v2 or "(tanımsız)",
+                "status": "added" if v1 is None else ("removed" if v2 is None else "changed")
+            })
+
+    files1 = {f["name"]: f for f in data1.get("files", [])}
+    files2 = {f["name"]: f for f in data2.get("files", [])}
+    all_files = sorted(set(files1.keys()) | set(files2.keys()))
+    file_diff = []
+    unchanged_count = 0
+    for fn in all_files:
+        f1 = files1.get(fn)
+        f2 = files2.get(fn)
+        if not f1:
+            file_diff.append({
+                "name": fn,
+                "status": "added",
+                "size2": f2.get("size", 0),
+                "mode2": f2.get("mode", ""),
+                "isdir": f2.get("isdir", False)
+            })
+        elif not f2:
+            file_diff.append({
+                "name": fn,
+                "status": "removed",
+                "size1": f1.get("size", 0),
+                "mode1": f1.get("mode", ""),
+                "isdir": f1.get("isdir", False)
+            })
+        elif f1.get("size") != f2.get("size") or f1.get("mode") != f2.get("mode"):
+            file_diff.append({
+                "name": fn,
+                "status": "modified",
+                "size1": f1.get("size", 0),
+                "size2": f2.get("size", 0),
+                "mode1": f1.get("mode", ""),
+                "mode2": f2.get("mode", ""),
+                "isdir": f1.get("isdir", False)
+            })
+        else:
+            unchanged_count += 1
+
+    return {
+        "success": True,
+        "pkg1": {
+            "name": ctrl1.get("package", data1.get("filename")),
+            "version": ctrl1.get("version", "-"),
+            "size": data1.get("size", 0),
+            "files_count": len(files1)
+        },
+        "pkg2": {
+            "name": ctrl2.get("package", data2.get("filename")),
+            "version": ctrl2.get("version", "-"),
+            "size": data2.get("size", 0),
+            "files_count": len(files2)
+        },
+        "control_diff": control_diff,
+        "file_diff": file_diff,
+        "unchanged_files_count": unchanged_count
+    }
+
+
 def get_gpg_key():
     candidates = [
         PUBLIC_DIR / "public.key",
@@ -485,6 +641,95 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
             MetricsTracker.record_download(fname, fsize, client_ip, "Simüle İndirme (Test)")
             return self.send_json_response({"success": True, "message": f"'{pkg_name}' için indirme metriklerine test kaydı eklendi."})
 
+        elif parsed.path == "/api/snapshot/create":
+            if not self.verify_auth():
+                return self.send_json_response({"success": False, "error": "İşlem için API Token gereklidir."}, 401)
+            try:
+                content_length = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(content_length).decode("utf-8")) if content_length > 0 else {}
+            except Exception:
+                body = {}
+            repo = body.get("repo", "parslinux").strip() or "parslinux"
+            name = body.get("name", "").strip()
+            desc = body.get("description", "").strip()
+            if not name:
+                now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+                name = f"snap_{repo}_{now_str}"
+            
+            cmd = [str(APTLY_BIN), "snapshot", "create", name, "from", "repo", repo]
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            if res.returncode == 0:
+                return self.send_json_response({
+                    "success": True,
+                    "message": f"'{name}' anlık görüntüsü '{repo}' deposundan başarıyla oluşturuldu.",
+                    "name": name
+                })
+            else:
+                err_msg = (res.stderr or res.stdout).strip() or "Snapshot oluşturulamadı."
+                return self.send_json_response({"success": False, "error": err_msg}, 400)
+
+        elif parsed.path == "/api/snapshot/rollback":
+            if not self.verify_auth():
+                return self.send_json_response({"success": False, "error": "İşlem için API Token gereklidir."}, 401)
+            try:
+                content_length = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(content_length).decode("utf-8")) if content_length > 0 else {}
+            except Exception:
+                body = {}
+            snapshot = body.get("snapshot", "").strip()
+            target_repo = body.get("repo", "parslinux").strip() or "parslinux"
+            dist = body.get("distribution", "bookworm").strip() or "bookworm"
+            if not snapshot:
+                return self.send_json_response({"success": False, "error": "Snapshot adı eksik."}, 400)
+            
+            repo_show = run_cmd([str(APTLY_BIN), "repo", "show", target_repo])
+            comp = "main"
+            comment = "Geri Yüklendi (Rollback)"
+            for line in repo_show.splitlines():
+                if "Default Component:" in line:
+                    comp = line.split(":", 1)[1].strip() or "main"
+                elif "Comment:" in line:
+                    comment = line.split(":", 1)[1].strip()
+
+            run_cmd([str(APTLY_BIN), "repo", "drop", target_repo])
+            c_res = subprocess.run([
+                str(APTLY_BIN), "repo", "create",
+                f"-distribution={dist}",
+                f"-component={comp}",
+                f"-comment={comment}",
+                target_repo,
+                "from", "snapshot", snapshot
+            ], capture_output=True, text=True)
+
+            if c_res.returncode != 0:
+                return self.send_json_response({"success": False, "error": (c_res.stderr or c_res.stdout).strip()}, 500)
+
+            run_cmd([str(APTLY_BIN), "publish", "update", "-skip-signing", dist])
+            if dist == "bookworm":
+                run_cmd([str(APTLY_BIN), "publish", "update", "-skip-signing", "0.1"])
+
+            return self.send_json_response({
+                "success": True,
+                "message": f"'{target_repo}' deposu '{snapshot}' durumuna geri döndürüldü ve '{dist}' yayını güncellendi."
+            })
+
+        elif parsed.path == "/api/snapshot/drop":
+            if not self.verify_auth():
+                return self.send_json_response({"success": False, "error": "İşlem için API Token gereklidir."}, 401)
+            try:
+                content_length = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(content_length).decode("utf-8")) if content_length > 0 else {}
+            except Exception:
+                body = {}
+            name = body.get("name", "").strip()
+            if not name:
+                return self.send_json_response({"success": False, "error": "Snapshot adı eksik."}, 400)
+            res = subprocess.run([str(APTLY_BIN), "snapshot", "drop", "-force", name], capture_output=True, text=True)
+            if res.returncode == 0:
+                return self.send_json_response({"success": True, "message": f"'{name}' anlık görüntüsü silindi."})
+            else:
+                return self.send_json_response({"success": False, "error": (res.stderr or res.stdout).strip()}, 400)
+
         self.send_error(404, "Endpoint bulunamadı")
 
     def do_GET(self):
@@ -578,6 +823,37 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
             res = inspect_deb_package(pkg_name, pkg_ver)
             self.send_json_response(res, 200 if res.get("success") else 404)
             return
+
+        elif path == "/api/snapshots":
+            snaps = get_snapshots_info()
+            return self.send_json_response({"snapshots": snaps})
+
+        elif path == "/api/snapshot/diff":
+            q = urllib.parse.parse_qs(parsed.query)
+            s1 = q.get("snap1", [""])[0].strip()
+            s2 = q.get("snap2", [""])[0].strip()
+            if not s1 or not s2:
+                return self.send_json_response({"success": False, "error": "snap1 ve snap2 parametreleri gereklidir."}, 400)
+            diffs = parse_snapshot_diff(s1, s2)
+            return self.send_json_response({
+                "success": True,
+                "snap1": s1,
+                "snap2": s2,
+                "differences": diffs
+            })
+
+        elif path == "/api/package/diff":
+            q = urllib.parse.parse_qs(parsed.query)
+            p1 = q.get("pkg1", [""])[0].strip()
+            v1 = q.get("ver1", [""])[0].strip()
+            p2 = q.get("pkg2", [""])[0].strip()
+            v2 = q.get("ver2", [""])[0].strip()
+            if not p1 or not p2:
+                return self.send_json_response({"success": False, "error": "pkg1 ve pkg2 parametreleri gereklidir."}, 400)
+            data1 = inspect_deb_package(p1, v1)
+            data2 = inspect_deb_package(p2, v2)
+            res = compare_package_data(data1, data2)
+            return self.send_json_response(res, 200 if res.get("success") else 400)
 
         elif path == "/api/wkd/status":
             wkd_dir = ROOT_DIR / ".well-known" / "openpgpkey"

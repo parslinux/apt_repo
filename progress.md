@@ -90,5 +90,16 @@ Bu belge, APT Depo Yönetim Projesi'nin mevcut durumunu, tamamlanan adımların�
   - SHA-1 + zbase32 hash hesaplama algoritmasıyla (`gkux3qirko9oqgy8uy54k78iopxuno96`) hem doğrudan hem de alan adı tabanlı WKD yapısı (`scripts/setup_wkd.py`).
   - Web kontrol panelinde canlı WKD durum denetleyicisi (`/api/wkd/status`), otomatik import komutları ve `manage.sh` menü entegrasyonu (Seçenek 16).
   - Canlı GitHub Pages ortamında (`https://parslinux.github.io/apt_repo/.well-known/openpgpkey/`) ve yerel sunucuda anında erişim.
-- [ ] **Paket İndirme Zaman Serisi Grafiği (Chart.js / SVG):** Günlük/haftalık indirme trendlerini görselleştiren interaktif grafik.
+- [x] **Paket İndirme Zaman Serisi Grafiği (Modern SVG Chart):**
+  - Son 7 günlük indirme trendlerini gösteren dinamik SVG alan ve çizgi grafiği (`downloadTrendsSvg`).
+  - Çift gradyanlı görsel tasarım (`#6366f1` -> `#a855f7` -> `#38bdf8`), yumuşak alan dolgusu ve ızgara çizgileri.
+  - Veri noktaları üzerinde fare gezdirildiğinde anlık tarih ve indirme miktarını gösteren etkileşimli tooltip kartı (`.chart-tooltip`).
+  - "Test İndirmesi Simüle Et" butonuna basıldığında hem sayaçların hem de zaman serisi grafiğinin canlı güncellenmesi.
+
+---
+
+## 🔮 Gelecek İyileştirmeler (Genişletme Fikirleri)
+
+- [ ] **REST API Güvenliği & API Token Yetkilendirmesi:** `/api/upload` ve `/api/metrics/reset` uç noktaları için opsiyonel Bearer Token kimlik doğrulama başlığı.
+- [ ] **Gelişmiş Filtreleme & Arama:** Web panelinde mimariye (`all`, `amd64`, `arm64`) ve depolara göre anlık çoklu filtreleme.
 

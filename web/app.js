@@ -868,9 +868,144 @@ document.addEventListener('DOMContentLoaded', () => {
                     `).join('');
                 }
             }
+
+            // 4. Zaman Serisi Grafiğini Render Et
+            renderDownloadTrendsChart(data);
         } catch (err) {
             console.error('Metrik yükleme hatası:', err);
         }
+    }
+
+    // 13. Zaman Serisi SVG Trend Grafiği Oluşturucu
+    function renderDownloadTrendsChart(data) {
+        const svg = document.getElementById('downloadTrendsSvg');
+        const gridGroup = document.getElementById('chartGridGroup');
+        const areaPath = document.getElementById('chartAreaPath');
+        const linePath = document.getElementById('chartLinePath');
+        const dotsGroup = document.getElementById('chartDotsGroup');
+        const labelsGroup = document.getElementById('chartLabelsGroup');
+        const tooltip = document.getElementById('chartTooltip');
+        const totalPeriodEl = document.getElementById('chartTotalPeriod');
+        const container = document.getElementById('metricsChartContainer');
+
+        if (!svg || !gridGroup || !areaPath || !linePath || !dotsGroup || !labelsGroup) return;
+
+        // Son 7 günü oluştur
+        const days = [];
+        const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+        const dailyTrends = data.daily_trends || {};
+        let periodSum = 0;
+
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const iso = d.toISOString().split('T')[0];
+            const label = `${d.getDate()} ${monthNames[d.getMonth()]}`;
+            const count = dailyTrends[iso] || 0;
+            periodSum += count;
+            days.push({ iso, label, count });
+        }
+
+        if (totalPeriodEl) {
+            totalPeriodEl.textContent = `${periodSum.toLocaleString()} İndirme`;
+        }
+
+        // Boyutlar ve Koordinatlar
+        const svgWidth = 800;
+        const svgHeight = 200;
+        const padLeft = 55;
+        const padRight = 30;
+        const padTop = 30;
+        const padBottom = 35;
+
+        const chartWidth = svgWidth - padLeft - padRight;
+        const chartHeight = svgHeight - padTop - padBottom;
+
+        const maxVal = Math.max(...days.map(d => d.count), 5);
+        const niceMax = Math.ceil(maxVal * 1.25);
+
+        // Grid ve Y ekseni etiketleri
+        const gridSteps = 3;
+        let gridHtml = '';
+        for (let s = 0; s <= gridSteps; s++) {
+            const ratio = s / gridSteps;
+            const y = padTop + chartHeight - (ratio * chartHeight);
+            const val = Math.round(ratio * niceMax);
+
+            gridHtml += `
+                <line class="chart-grid-line" x1="${padLeft}" y1="${y}" x2="${svgWidth - padRight}" y2="${y}"/>
+                <text class="chart-y-label" x="${padLeft - 12}" y="${y + 4}">${val}</text>
+            `;
+        }
+        gridGroup.innerHTML = gridHtml;
+
+        // Nokta hesaplama
+        const points = days.map((day, idx) => {
+            const x = padLeft + (idx / (days.length - 1)) * chartWidth;
+            const y = padTop + chartHeight - (day.count / niceMax) * chartHeight;
+            return { x, y, ...day };
+        });
+
+        // Çizgi ve Alan Yolları (SVG path)
+        if (points.length > 0) {
+            const lineD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+            linePath.setAttribute('d', lineD);
+
+            const areaD = `${lineD} L ${points[points.length - 1].x.toFixed(1)} ${padTop + chartHeight} L ${points[0].x.toFixed(1)} ${padTop + chartHeight} Z`;
+            areaPath.setAttribute('d', areaD);
+        }
+
+        // Noktalar ve X ekseni etiketleri
+        let dotsHtml = '';
+        let labelsHtml = '';
+
+        points.forEach((p) => {
+            dotsHtml += `
+                <circle class="chart-dot" 
+                        cx="${p.x.toFixed(1)}" 
+                        cy="${p.y.toFixed(1)}" 
+                        data-label="${p.label}" 
+                        data-count="${p.count}"
+                        data-iso="${p.iso}">
+                </circle>
+            `;
+
+            labelsHtml += `
+                <text class="chart-axis-label" x="${p.x.toFixed(1)}" y="${svgHeight - 10}">${p.label}</text>
+            `;
+        });
+
+        dotsGroup.innerHTML = dotsHtml;
+        labelsGroup.innerHTML = labelsHtml;
+
+        // Tooltip Etkileşimi
+        const dots = dotsGroup.querySelectorAll('.chart-dot');
+        dots.forEach(dot => {
+            dot.addEventListener('mouseenter', () => {
+                const label = dot.getAttribute('data-label');
+                const count = dot.getAttribute('data-count');
+                const iso = dot.getAttribute('data-iso');
+                if (tooltip && container) {
+                    tooltip.innerHTML = `
+                        <div class="chart-tooltip-date">${label} (${iso})</div>
+                        <div class="chart-tooltip-val">📥 ${count} İndirme</div>
+                    `;
+                    tooltip.style.display = 'block';
+
+                    const rect = container.getBoundingClientRect();
+                    const dotRect = dot.getBoundingClientRect();
+                    const left = dotRect.left - rect.left + (dotRect.width / 2);
+                    const top = dotRect.top - rect.top;
+
+                    tooltip.style.left = `${left}px`;
+                    tooltip.style.top = `${top}px`;
+                }
+            });
+
+            dot.addEventListener('mouseleave', () => {
+                if (tooltip) tooltip.style.display = 'none';
+            });
+        });
     }
 
     // Buton Dinleyicileri (Metrikler)

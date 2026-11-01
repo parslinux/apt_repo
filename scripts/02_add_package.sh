@@ -41,6 +41,22 @@ if [ ! -e "$PKG_PATH" ]; then
     exit 1
 fi
 
+# Otomatik Snapshot (Auto-Snapshot) Kancası
+AUTO_SNAP="auto-${REPO_NAME}-$(date +%Y%m%d-%H%M%S)"
+echo -e "${YELLOW}[GÜVENLİK] Paket eklenmeden önce otomatik snapshot alınıyor: ${AUTO_SNAP}...${NC}"
+if "$APTLY" snapshot create "$AUTO_SNAP" from repo "$REPO_NAME" >/dev/null 2>&1; then
+    echo -e "${GREEN}[BAŞARILI] Otomatik snapshot oluşturuldu: $AUTO_SNAP${NC}"
+    # Rotasyon: En eski auto snapshot'ları temizle (Son 5 snapshot saklanır)
+    OLD_SNAPS=$("$APTLY" snapshot list -raw 2>/dev/null | grep "^auto-${REPO_NAME}-" | head -n -5 || true)
+    if [ -n "$OLD_SNAPS" ]; then
+        for osnap in $OLD_SNAPS; do
+            "$APTLY" snapshot drop "$osnap" >/dev/null 2>&1 || true
+        done
+    fi
+else
+    echo -e "${YELLOW}[BİLGİ] Otomatik snapshot atlandı (Depo henüz boş olabilir).${NC}"
+fi
+
 echo -e "Eklenecek Paket: ${GREEN}$PKG_PATH${NC}"
 "$APTLY" repo add "$REPO_NAME" "$PKG_PATH"
 

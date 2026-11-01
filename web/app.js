@@ -1510,12 +1510,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        snapshotsContainer.innerHTML = snapshots.map(snap => `
+        snapshotsContainer.innerHTML = snapshots.map(snap => {
+            const isAuto = snap.name.startsWith('auto-');
+            const autoBadge = isAuto ? `<span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); font-size: 0.72rem;">🤖 Otomatik Yedek</span>` : '';
+            return `
             <div class="snapshot-card">
                 <div>
                     <div class="snapshot-card-top">
-                        <div class="snapshot-title">${escapeHtml(snap.name)}</div>
-                        <span class="badge badge-emerald">${snap.package_count || 0} Paket</span>
+                        <div class="snapshot-title" title="${escapeHtml(snap.name)}">${escapeHtml(snap.name)}</div>
+                        <div style="display: flex; gap: 0.35rem; align-items: center;">
+                            ${autoBadge}
+                            <span class="badge badge-emerald">${snap.package_count || 0} Paket</span>
+                        </div>
                     </div>
                     <div class="snapshot-meta-row">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>

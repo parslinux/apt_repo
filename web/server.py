@@ -365,6 +365,29 @@ def get_snapshots_info():
         })
     return snapshots
 
+def create_auto_snapshot(repo_name: str, max_keep: int = 5):
+    """Paket yükleme öncesi otomatik snapshot alır ve eski olanları temizler."""
+    try:
+        ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+        snap_name = f"auto-{repo_name}-{ts}"
+        desc = f"Paket ekleme öncesi otomatik sistem yedeği ({datetime.now().strftime('%d.%m.%Y %H:%M:%S')})"
+        res = run_cmd([str(APTLY_BIN), "snapshot", "create", snap_name, "from", "repo", repo_name])
+        if "successfully" not in res and "Created" not in res and not res.startswith("Snapshot"):
+            # Repo boş olabilir veya hata vermiştir
+            pass
+        
+        # Rotasyon: En eski auto snapshot'ları temizle
+        all_snaps_raw = run_cmd([str(APTLY_BIN), "snapshot", "list", "-raw"])
+        auto_snaps = sorted([s for s in all_snaps_raw.splitlines() if s.startswith(f"auto-{repo_name}-")])
+        if len(auto_snaps) > max_keep:
+            for old_snap in auto_snaps[:-max_keep]:
+                run_cmd([str(APTLY_BIN), "snapshot", "drop", old_snap])
+        
+        return snap_name
+    except Exception as e:
+        print(f"[Auto-Snapshot Hatası] {e}", file=sys.stderr)
+        return None
+
 def parse_snapshot_diff(snap1, snap2):
     """İki snapshot arasındaki diff çıktısını ayrıştırır."""
     out = run_cmd([str(APTLY_BIN), "snapshot", "diff", snap1, snap2])
@@ -569,6 +592,9 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
                 if not uploaded_files:
                     return self.send_json_response({"success": False, "error": "Hiçbir geçerli .deb dosyası bulunamadı."}, 400)
 
+                # Paket yükleme öncesi güvenlik için Otomatik Snapshot al
+                auto_snap = create_auto_snapshot(target_repo, max_keep=5)
+
                 added_info = []
                 for fname, fpath in uploaded_files:
                     run_cmd([str(APTLY_BIN), "repo", "add", target_repo, str(fpath)])
@@ -591,11 +617,16 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
                         except Exception as we:
                             print(f"[Webhook Bildirim Hatası] {we}", file=sys.stderr)
 
+                msg_txt = f"{len(added_info)} paket '{target_repo}' deposuna eklendi ve yayın güncellendi."
+                if auto_snap:
+                    msg_txt += f" (Otomatik Snapshot: {auto_snap})"
+
                 return self.send_json_response({
                     "success": True,
-                    "message": f"{len(added_info)} paket '{target_repo}' deposuna eklendi ve yayın güncellendi.",
+                    "message": msg_txt,
                     "packages": added_info,
-                    "repo": target_repo
+                    "repo": target_repo,
+                    "auto_snapshot": auto_snap
                 })
             except Exception as e:
                 return self.send_json_response({"success": False, "error": f"Yükleme hatası: {str(e)}"}, 500)

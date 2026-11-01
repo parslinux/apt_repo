@@ -98,8 +98,29 @@ Bu belge, APT Depo Yönetim Projesi'nin mevcut durumunu, tamamlanan adımların�
 
 ---
 
+- [x] **🔍 Gelişmiş Filtreleme & Sıralama (Panel & Canlı Portal):**
+  - Mimariye göre anlık filtreleme hapları (`Tümü`, `all`, `amd64`, `arm64`, `armhf`, `i386`).
+  - Çoklu sıralama seçenekleri: İsim (A-Z), İsim (Z-A), İndirme Sayısı (Çoktan Aza), Boyut (Büyükten Küçüğe, Küçükten Büyüğe).
+  - Tek tıkla arama temizleme butonu (`✕`) ve listelenen paketler için dinamik sonuç sayacı rozeti.
+- [x] **📁 Paket İçi Dosya Gezgini & Debian Control İnceleyici (In-Depth Inspector):**
+  - Dış sistem bağımlılığı (`dpkg-deb`) olmadan çalışan saf Python `ar` ve `tarfile` arşiv ayrıştırıcısı (`inspect_deb_package`).
+  - Paket detay modalında 3 sekmeli yapı: `📋 Genel & Bağımlılıklar`, `📁 Dosya Ağacı` ve `📄 Debian Control`.
+  - Paket içerisindeki tüm dizin ve dosyaları izinleri, boyutları ve türlerine göre listeleme; dosya içi anlık arama/filtreleme.
+  - Orijinal `DEBIAN/control` dosyasını biçimlendirilmiş kod bloğunda görüntüleme ve tek tıkla panoya kopyalama.
+- [x] **🛡️ REST API Güvenliği & API Token Yetkilendirmesi:**
+  - `APT_REPO_API_TOKEN` çevre değişkeni veya `.api_token` yapılandırma dosyası ile dinamik token koruması.
+  - `/api/upload` (paket yükleme) ve `/api/metrics/reset` (istatistik sıfırlama) uç noktaları için `Authorization: Bearer <token>` ve `X-API-Key: <token>` başlık doğrulaması.
+  - Web panelinde API token durum göstergesi (`🔒 Korumalı` / `🔓 Açık`), token kaydetme/doğrulama modalı ve yerel `localStorage` entegrasyonu.
+- [x] **🌐 Canlı GitHub Pages Portalı Zenginleştirmesi & Taşıntı Düzeltmeleri:**
+  - `https://parslinux.github.io/apt_repo/` sayfasına 4 adet cam efektli KPI istatistik kartı eklendi.
+  - Canlı portala mimari filtreleme (`Tümü`, `all`, `amd64`), sıralama ve temizlenebilir arama çubuğu entegre edildi.
+  - İstemci kurulum adımlarındaki uzun komut ve linklerin mobilde/dar ekranlarda taşmasını önleyen CSS `word-break: break-word`, `overflow-wrap: anywhere` ve `min-width: 0` düzenlemeleri uygulandı.
+
+---
+
 ## 🔮 Gelecek İyileştirmeler (Genişletme Fikirleri)
 
-- [ ] **REST API Güvenliği & API Token Yetkilendirmesi:** `/api/upload` ve `/api/metrics/reset` uç noktaları için opsiyonel Bearer Token kimlik doğrulama başlığı.
-- [ ] **Gelişmiş Filtreleme & Arama:** Web panelinde mimariye (`all`, `amd64`, `arm64`) ve depolara göre anlık çoklu filtreleme.
+- [ ] **Aptly Snapshot & Rollback Arayüzü:** Web paneli üzerinden anlık depo snapshot'ı alma ve önceki sürümlere tek tıkla geri dönebilme.
+- [ ] **Paket Karşılaştırma Aracı (Diff Inspector):** Aynı paketin farklı iki sürümü arasındaki control ve dosya ağacı farklarını görselleştirme.
+
 

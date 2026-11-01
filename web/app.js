@@ -38,6 +38,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnRefreshMetrics = document.getElementById('btnRefreshMetrics');
     const btnResetMetrics = document.getElementById('btnResetMetrics');
 
+    // Filtre & Sıralama Elementleri
+    let currentArchFilter = 'all';
+    let currentInspectedFiles = [];
+    const sortSelect = document.getElementById('sortSelect');
+    const btnSearchClear = document.getElementById('btnSearchClear');
+    const archFilterPills = document.querySelectorAll('.arch-pill');
+    const packageResultsCount = document.getElementById('packageResultsCount');
+
+    // API Token Elementleri
+    const btnApiSettings = document.getElementById('btnApiSettings');
+    const apiStatusNavLabel = document.getElementById('apiStatusNavLabel');
+    const apiTokenModal = document.getElementById('apiTokenModal');
+    const modalApiCloseBtn = document.getElementById('modalApiCloseBtn');
+    const inputApiToken = document.getElementById('inputApiToken');
+    const btnSaveApiToken = document.getElementById('btnSaveApiToken');
+    const btnClearApiToken = document.getElementById('btnClearApiToken');
+    const apiTokenTestResult = document.getElementById('apiTokenTestResult');
+
+    // Modal Subnav Elementleri
+    const modalSubnavBtns = document.querySelectorAll('.modal-tab-btn');
+    const modalViews = document.querySelectorAll('.modal-view');
+    const modalFilesCountBadge = document.getElementById('modalFilesCountBadge');
+    const modalFilesSizeBadge = document.getElementById('modalFilesSizeBadge');
+    const modalFilesTreeList = document.getElementById('modalFilesTreeList');
+    const modalFileSearchInput = document.getElementById('modalFileSearchInput');
+    const modalControlRaw = document.getElementById('modalControlRaw');
+    const btnCopyControlText = document.getElementById('btnCopyControlText');
+
+    // Auth Başlıkları Yardımcısı
+    function getAuthHeaders(extra = {}) {
+        const token = localStorage.getItem('apt_repo_api_token');
+        const headers = { ...extra };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+            headers['X-API-Key'] = token;
+        }
+        return headers;
+    }
+
     // Modal Elementleri
     const packageModal = document.getElementById('packageModal');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
@@ -198,16 +237,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
         const selectedRepo = repoFilterSelect ? repoFilterSelect.value : 'all';
+        const selectedSort = sortSelect ? sortSelect.value : 'name-asc';
 
-        const filtered = allPackages.filter(pkg => {
+        if (btnSearchClear) {
+            btnSearchClear.style.display = query ? 'flex' : 'none';
+        }
+
+        let filtered = allPackages.filter(pkg => {
             const matchQuery = !query || 
                 pkg.name.toLowerCase().includes(query) || 
                 (pkg.description && pkg.description.toLowerCase().includes(query)) ||
                 (pkg.architecture && pkg.architecture.toLowerCase().includes(query));
 
             const matchRepo = selectedRepo === 'all' || pkg.repo === selectedRepo;
-            return matchQuery && matchRepo;
+
+            let matchArch = true;
+            if (currentArchFilter === 'all-arch') {
+                matchArch = (pkg.architecture === 'all');
+            } else if (currentArchFilter !== 'all') {
+                matchArch = (pkg.architecture === currentArchFilter);
+            }
+
+            return matchQuery && matchRepo && matchArch;
         });
+
+        // Sıralama Mantığı
+        filtered.sort((a, b) => {
+            if (selectedSort === 'name-asc') {
+                return a.name.localeCompare(b.name);
+            } else if (selectedSort === 'name-desc') {
+                return b.name.localeCompare(a.name);
+            } else if (selectedSort === 'downloads-desc') {
+                const da = (downloadMetrics.top_packages || []).find(p => p.name === a.name)?.downloads || 0;
+                const db = (downloadMetrics.top_packages || []).find(p => p.name === b.name)?.downloads || 0;
+                return db - da;
+            } else if (selectedSort === 'size-desc') {
+                return (b.size || 0) - (a.size || 0);
+            } else if (selectedSort === 'size-asc') {
+                return (a.size || 0) - (b.size || 0);
+            }
+            return 0;
+        });
+
+        if (packageResultsCount) {
+            packageResultsCount.textContent = `${filtered.length} Paket`;
+        }
 
         if (filtered.length === 0) {
             packagesGrid.innerHTML = `
@@ -376,10 +450,91 @@ document.addEventListener('DOMContentLoaded', () => {
             modalDownloadBtn.style.display = 'none';
         }
 
+        // Modal sekmesini varsayılan olarak Genel görünümüne al
+        switchModalTab('modalViewOverview');
+
         // Bağımlılık Ağacı Görselleştiriciyi Çalıştır
         renderDependencyVisualizer(pkg);
 
+        // Paket İçi Dosya Gezgini ve Control İncelemesini Tetikle
+        inspectPackageContents(pkg);
+
         packageModal.classList.add('active');
+    }
+
+    function switchModalTab(targetViewId) {
+        modalSubnavBtns.forEach(btn => {
+            const isTarget = btn.getAttribute('data-modaltab') === targetViewId;
+            btn.classList.toggle('active', isTarget);
+        });
+        modalViews.forEach(v => {
+            if (v.id === targetViewId) {
+                v.style.display = 'block';
+                v.classList.add('active');
+            } else {
+                v.style.display = 'none';
+                v.classList.remove('active');
+            }
+        });
+    }
+
+    function inspectPackageContents(pkg) {
+        if (modalFilesCountBadge) modalFilesCountBadge.textContent = '...';
+        if (modalFilesSizeBadge) modalFilesSizeBadge.textContent = formatBytes(pkg.size);
+        if (modalFilesTreeList) modalFilesTreeList.innerHTML = `<div class="text-center text-muted" style="padding: 2.5rem;">Dosyalar ayrıştırılıyor...</div>`;
+        if (modalControlRaw) modalControlRaw.textContent = 'Control dosyası taranıyor...';
+        currentInspectedFiles = [];
+        if (modalFileSearchInput) modalFileSearchInput.value = '';
+
+        fetch(`/api/package/inspect?name=${encodeURIComponent(pkg.name)}&version=${encodeURIComponent(pkg.version || '')}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (modalFilesCountBadge) modalFilesCountBadge.textContent = (data.files || []).length;
+                    if (modalFilesSizeBadge) modalFilesSizeBadge.textContent = formatBytes(data.size);
+                    currentInspectedFiles = data.files || [];
+                    renderModalFilesList(currentInspectedFiles);
+                    if (modalControlRaw) modalControlRaw.textContent = data.control || 'Control dosyası boş.';
+                } else {
+                    if (modalFilesCountBadge) modalFilesCountBadge.textContent = '0';
+                    if (modalFilesTreeList) modalFilesTreeList.innerHTML = `<div class="text-center text-muted" style="padding: 2.5rem;">${escapeHtml(data.error || 'Dosyalar okunamadı.')}</div>`;
+                    if (modalControlRaw) modalControlRaw.textContent = data.error || 'Control metni okunamadı.';
+                }
+            })
+            .catch(err => {
+                if (modalFilesCountBadge) modalFilesCountBadge.textContent = '0';
+                if (modalFilesTreeList) modalFilesTreeList.innerHTML = `<div class="text-center text-muted" style="padding: 2.5rem;">Hata: ${escapeHtml(err.message)}</div>`;
+                if (modalControlRaw) modalControlRaw.textContent = 'Bağlantı hatası: ' + err.message;
+            });
+    }
+
+    function renderModalFilesList(files) {
+        if (!modalFilesTreeList) return;
+        const q = (modalFileSearchInput ? modalFileSearchInput.value : '').toLowerCase().trim();
+        const filtered = q ? files.filter(f => f.name.toLowerCase().includes(q)) : files;
+        if (filtered.length === 0) {
+            modalFilesTreeList.innerHTML = `<div class="text-center text-muted" style="padding: 2rem;">Eşleşen dosya bulunamadı.</div>`;
+            return;
+        }
+
+        modalFilesTreeList.innerHTML = filtered.map(f => {
+            const isDir = f.isdir || f.name.endsWith('/');
+            const icon = isDir ? '📁' : '📄';
+            const sizeStr = isDir ? '-' : formatBytes(f.size);
+            return `
+                <div class="pkg-file-row">
+                    <div class="pkg-file-left" title="${escapeHtml(f.name)}">
+                        <span class="pkg-file-icon">${icon}</span>
+                        <span class="pkg-file-name ${isDir ? 'is-dir' : ''}">${escapeHtml(f.name)}</span>
+                    </div>
+                    <div class="pkg-file-right">
+                        <span>${escapeHtml(f.mode || '-')}</span>
+                        <span>•</span>
+                        <span style="font-weight: 600; color: #a5b4fc;">${sizeStr}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     function renderDependencyVisualizer(pkg) {
@@ -508,9 +663,145 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2500);
     }
 
-    // 9. Arama ve Filtre Dinleyicileri
+    // 9. Arama, Mimari ve Sıralama Dinleyicileri
     if (searchInput) searchInput.addEventListener('input', renderPackages);
+    if (btnSearchClear) {
+        btnSearchClear.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            btnSearchClear.style.display = 'none';
+            renderPackages();
+            if (searchInput) searchInput.focus();
+        });
+    }
     if (repoFilterSelect) repoFilterSelect.addEventListener('change', renderPackages);
+    if (sortSelect) sortSelect.addEventListener('change', renderPackages);
+
+    archFilterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            archFilterPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentArchFilter = pill.getAttribute('data-arch') || 'all';
+            renderPackages();
+        });
+    });
+
+    // Modal Subnav Sekme Değişimi
+    modalSubnavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-modaltab');
+            if (targetId) switchModalTab(targetId);
+        });
+    });
+
+    if (modalFileSearchInput) {
+        modalFileSearchInput.addEventListener('input', () => {
+            renderModalFilesList(currentInspectedFiles);
+        });
+    }
+
+    if (btnCopyControlText) {
+        btnCopyControlText.addEventListener('click', () => {
+            const txt = modalControlRaw ? modalControlRaw.textContent : '';
+            copyToClipboard(txt, 'Debian control metni panoya kopyalandı!');
+        });
+    }
+
+    // REST API Güvenlik ve Token Yönetimi
+    async function loadAuthStatus() {
+        if (!apiStatusNavLabel) return;
+        try {
+            const res = await fetch('/api/auth/status');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.enabled) {
+                    const savedToken = localStorage.getItem('apt_repo_api_token');
+                    if (savedToken) {
+                        apiStatusNavLabel.textContent = '🔒 Yetkili';
+                        btnApiSettings.className = 'btn btn-primary btn-sm';
+                    } else {
+                        apiStatusNavLabel.textContent = '⚠️ Token Gerekli';
+                        btnApiSettings.className = 'btn btn-secondary btn-sm';
+                    }
+                } else {
+                    apiStatusNavLabel.textContent = 'API Açık';
+                    btnApiSettings.className = 'btn btn-secondary btn-sm';
+                }
+            }
+        } catch {
+            apiStatusNavLabel.textContent = 'API';
+        }
+    }
+
+    if (btnApiSettings && apiTokenModal) {
+        btnApiSettings.addEventListener('click', () => {
+            if (inputApiToken) {
+                inputApiToken.value = localStorage.getItem('apt_repo_api_token') || '';
+            }
+            if (apiTokenTestResult) apiTokenTestResult.style.display = 'none';
+            apiTokenModal.classList.add('active');
+        });
+    }
+
+    if (modalApiCloseBtn && apiTokenModal) {
+        modalApiCloseBtn.addEventListener('click', () => apiTokenModal.classList.remove('active'));
+    }
+
+    if (apiTokenModal) {
+        apiTokenModal.addEventListener('click', (e) => {
+            if (e.target === apiTokenModal) apiTokenModal.classList.remove('active');
+        });
+    }
+
+    if (btnSaveApiToken) {
+        btnSaveApiToken.addEventListener('click', async () => {
+            const token = inputApiToken ? inputApiToken.value.trim() : '';
+            if (!token) {
+                showToast('Lütfen geçerli bir token girin veya Kaldır seçeneğini kullanın.');
+                return;
+            }
+            localStorage.setItem('apt_repo_api_token', token);
+            try {
+                const res = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'X-API-Key': token }
+                });
+                const data = await res.json();
+                if (apiTokenTestResult) {
+                    apiTokenTestResult.style.display = 'block';
+                    if (data.valid) {
+                        apiTokenTestResult.style.background = 'rgba(16, 185, 129, 0.2)';
+                        apiTokenTestResult.style.color = '#6ee7b7';
+                        apiTokenTestResult.textContent = '✓ Token sunucu tarafından doğrulandı ve kaydedildi!';
+                        showToast('API Token başarıyla doğrulandı!');
+                    } else {
+                        apiTokenTestResult.style.background = 'rgba(239, 68, 68, 0.2)';
+                        apiTokenTestResult.style.color = '#fca5a5';
+                        apiTokenTestResult.textContent = '✕ Token geçersiz veya sunucu ile uyuşmuyor.';
+                        showToast('Uyarı: Sunucu bu tokeni kabul etmedi.');
+                    }
+                }
+            } catch (err) {
+                showToast('Doğrulama hatası: ' + err.message);
+            }
+            loadAuthStatus();
+        });
+    }
+
+    if (btnClearApiToken) {
+        btnClearApiToken.addEventListener('click', () => {
+            localStorage.removeItem('apt_repo_api_token');
+            if (inputApiToken) inputApiToken.value = '';
+            if (apiTokenTestResult) {
+                apiTokenTestResult.style.display = 'block';
+                apiTokenTestResult.style.background = 'rgba(255, 255, 255, 0.05)';
+                apiTokenTestResult.style.color = 'var(--text-muted)';
+                apiTokenTestResult.textContent = 'API Token yerel hafızadan silindi.';
+            }
+            showToast('API Token silindi.');
+            loadAuthStatus();
+        });
+    }
+
     if (btnRefresh) {
         btnRefresh.addEventListener('click', () => {
             btnRefresh.classList.add('loading');
@@ -602,6 +893,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const res = await fetch(`/api/upload?repo=${encodeURIComponent(targetRepo)}`, {
                     method: 'POST',
+                    headers: getAuthHeaders(),
                     body: formData
                 });
                 const data = await res.json();
@@ -1058,11 +1350,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             try {
-                const res = await fetch('/api/metrics/reset', { method: 'POST' });
-                if (res.ok) {
+                const res = await fetch('/api/metrics/reset', {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
                     showToast('Tüm indirme metrikleri sıfırlandı.');
                     await loadMetricsData();
                     renderPackages();
+                } else {
+                    showToast('Hata: ' + (data.error || 'Sıfırlama başarısız'));
                 }
             } catch (err) {
                 showToast('Sıfırlama hatası: ' + err.message);
@@ -1075,6 +1373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboardData();
     loadWebhookStatus();
     loadWkdStatus();
+    loadAuthStatus();
     loadMetricsData();
 });
 

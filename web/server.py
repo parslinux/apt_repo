@@ -12,6 +12,8 @@ import subprocess
 import email
 from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+import io
+import tarfile
 import urllib.parse
 import threading
 from datetime import datetime
@@ -21,6 +23,92 @@ WEB_DIR = Path(__file__).resolve().parent
 APTLY_BIN = ROOT_DIR / "bin" / "aptly"
 PUBLIC_DIR = Path.home() / ".aptly" / "public"
 METRICS_FILE = ROOT_DIR / ".metrics.json"
+API_TOKEN_FILE = ROOT_DIR / ".api_token"
+
+def get_configured_api_token():
+    env_token = os.environ.get("APT_REPO_API_TOKEN", "").strip()
+    if env_token:
+        return env_token
+    if API_TOKEN_FILE.is_file():
+        try:
+            return API_TOKEN_FILE.read_text(encoding="utf-8").strip()
+        except Exception:
+            pass
+    return None
+
+def inspect_deb_package(pkg_name: str, pkg_version: str = ""):
+    target_deb = None
+    search_dirs = [
+        PUBLIC_DIR / "pool",
+        ROOT_DIR / "custom_packages",
+        ROOT_DIR / "sample_packages"
+    ]
+    for base in search_dirs:
+        if not base.is_dir():
+            continue
+        for f in base.rglob("*.deb"):
+            if pkg_version and f.name.startswith(f"{pkg_name}_{pkg_version}"):
+                target_deb = f
+                break
+            elif not target_deb and (f.name.startswith(f"{pkg_name}_") or f.stem == pkg_name):
+                target_deb = f
+        if target_deb and pkg_version and target_deb.name.startswith(f"{pkg_name}_{pkg_version}"):
+            break
+
+    if not target_deb or not target_deb.is_file():
+        return {"success": False, "error": f"'{pkg_name}' paketi diskte bulunamadı."}
+
+    try:
+        with open(target_deb, "rb") as f:
+            magic = f.read(8)
+            if magic != b"!<arch>\n":
+                return {"success": False, "error": "Geçersiz .deb arşivi (ar formatı eksik)."}
+            files = {}
+            while True:
+                header = f.read(60)
+                if not header or len(header) < 60:
+                    break
+                name = header[:16].decode("ascii", errors="ignore").strip().rstrip("/")
+                size = int(header[48:58].decode("ascii", errors="ignore").strip())
+                data = f.read(size)
+                if size % 2 == 1:
+                    f.read(1)
+                files[name] = data
+
+        control_text = ""
+        control_names = [k for k in files if k.startswith("control.tar")]
+        if control_names:
+            with tarfile.open(fileobj=io.BytesIO(files[control_names[0]])) as tar:
+                for m in tar.getmembers():
+                    if m.name.endswith("control") or m.name == "control":
+                        extracted = tar.extractfile(m)
+                        if extracted:
+                            control_text = extracted.read().decode("utf-8", errors="replace")
+                            break
+
+        file_tree = []
+        data_names = [k for k in files if k.startswith("data.tar")]
+        if data_names:
+            with tarfile.open(fileobj=io.BytesIO(files[data_names[0]])) as tar:
+                for m in tar.getmembers():
+                    file_tree.append({
+                        "name": m.name,
+                        "size": m.size,
+                        "isdir": m.isdir(),
+                        "mode": oct(m.mode),
+                        "mtime": datetime.fromtimestamp(m.mtime).strftime("%Y-%m-%d %H:%M:%S") if m.mtime else "-"
+                    })
+
+        return {
+            "success": True,
+            "filename": target_deb.name,
+            "path": str(target_deb),
+            "size": target_deb.stat().st_size,
+            "control": control_text,
+            "files": file_tree
+        }
+    except Exception as e:
+        return {"success": False, "error": f"Paket ayrıştırma hatası: {e}"}
 
 class MetricsTracker:
     _lock = threading.Lock()
@@ -269,12 +357,31 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(data).encode("utf-8"))
 
+    def verify_auth(self):
+        token = get_configured_api_token()
+        if not token:
+            return True
+        auth_header = self.headers.get("Authorization", "").strip()
+        api_key_header = self.headers.get("X-API-Key", "").strip()
+        client_token = ""
+        if auth_header.startswith("Bearer "):
+            client_token = auth_header[7:].strip()
+        elif api_key_header:
+            client_token = api_key_header
+        
+        return client_token == token
+
     def do_HEAD(self):
         self.do_GET()
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/api/upload":
+            if not self.verify_auth():
+                return self.send_json_response({
+                    "success": False,
+                    "error": "Bu işlem için geçerli bir API Token (Bearer veya X-API-Key) gereklidir."
+                }, 401)
             try:
                 content_length = int(self.headers.get("Content-Length", 0))
                 content_type = self.headers.get("Content-Type", "")
@@ -348,8 +455,21 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
             return self.send_json_response({"success": False, "error": "notify_webhook.sh betiği bulunamadı."}, 404)
 
         elif parsed.path == "/api/metrics/reset":
+            if not self.verify_auth():
+                return self.send_json_response({
+                    "success": False,
+                    "error": "Metrikleri sıfırlamak için geçerli bir API Token gereklidir."
+                }, 401)
             MetricsTracker.reset()
             return self.send_json_response({"success": True, "message": "İndirme metrikleri sıfırlandı."})
+
+        elif parsed.path == "/api/auth/verify":
+            configured = bool(get_configured_api_token())
+            valid = self.verify_auth()
+            return self.send_json_response({
+                "configured": configured,
+                "valid": valid
+            })
 
         elif parsed.path == "/api/metrics/simulate":
             try:
@@ -439,6 +559,24 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
                 "configured": has_conf,
                 "file": str(user_env if user_env.is_file() else env_file)
             })
+            return
+
+        elif path == "/api/auth/status":
+            token = get_configured_api_token()
+            self.send_json_response({
+                "enabled": bool(token)
+            })
+            return
+
+        elif path == "/api/package/inspect":
+            q = urllib.parse.parse_qs(parsed.query)
+            pkg_name = q.get("name", [""])[0].strip()
+            pkg_ver = q.get("version", [""])[0].strip()
+            if not pkg_name:
+                self.send_json_response({"success": False, "error": "name parametresi eksik."}, 400)
+                return
+            res = inspect_deb_package(pkg_name, pkg_ver)
+            self.send_json_response(res, 200 if res.get("success") else 404)
             return
 
         elif path == "/api/wkd/status":

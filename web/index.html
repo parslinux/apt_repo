@@ -39,6 +39,13 @@
                     <span class="status-dot"></span>
                     <span class="status-label" id="statusLabel">Sunucu Aktif</span>
                 </div>
+                <button class="btn btn-secondary btn-sm" id="btnApiSettings" title="API Güvenlik & Token Ayarları">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span id="apiStatusNavLabel">API</span>
+                </button>
                 <a href="/public.key" download="parslinux-archive-keyring.gpg" class="btn btn-secondary btn-sm" id="btnDownloadGpgNav" title="GPG Depo İmza Anahtarını İndir">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 2l-2 2m-1-1l-3 3m5 5l-6-6-7 7a5 5 0 0 0 7 7l6-6z"></path>
@@ -167,19 +174,44 @@
 
         <!-- SEKME 1: PAKET KATALOĞU -->
         <div class="tab-content active" id="packagesTab">
-            <!-- Arama & Filtre Çubuğu -->
+            <!-- Arama & Gelişmiş Filtre Çubuğu -->
             <div class="filter-card">
-                <div class="search-input-group">
-                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input type="text" id="searchInput" placeholder="Paket adı, açıklama veya mimariye göre ara..." autocomplete="off">
+                <div class="filter-main-row">
+                    <div class="search-input-group">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="Paket adı, açıklama veya mimariye göre ara..." autocomplete="off">
+                        <button type="button" id="btnSearchClear" class="search-clear-btn" title="Aramayı Temizle" style="display: none;">✕</button>
+                    </div>
+                    <div class="filter-select-group">
+                        <select id="repoFilterSelect" aria-label="Depo Filtrele">
+                            <option value="all">Tüm Depolar</option>
+                        </select>
+                        <select id="sortSelect" aria-label="Sıralama Seç">
+                            <option value="name-asc">Sırala: İsim (A-Z)</option>
+                            <option value="name-desc">Sırala: İsim (Z-A)</option>
+                            <option value="downloads-desc">Sırala: En Çok İndirilen</option>
+                            <option value="size-desc">Sırala: Boyut (Büyükten Küçüğe)</option>
+                            <option value="size-asc">Sırala: Boyut (Küçükten Büyüğe)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="filter-select-group">
-                    <select id="repoFilterSelect" aria-label="Depo Filtrele">
-                        <option value="all">Tüm Depolar</option>
-                    </select>
+
+                <div class="filter-secondary-row">
+                    <div class="arch-filter-pills" id="archFilterPills">
+                        <span class="arch-pill-label">Mimari:</span>
+                        <button type="button" class="arch-pill active" data-arch="all">Tümü</button>
+                        <button type="button" class="arch-pill" data-arch="all-arch">all</button>
+                        <button type="button" class="arch-pill" data-arch="amd64">amd64</button>
+                        <button type="button" class="arch-pill" data-arch="arm64">arm64</button>
+                        <button type="button" class="arch-pill" data-arch="armhf">armhf</button>
+                        <button type="button" class="arch-pill" data-arch="i386">i386</button>
+                    </div>
+                    <div class="filter-results-info">
+                        <span id="packageResultsCount" class="badge badge-primary">0 Paket</span>
+                    </div>
                 </div>
             </div>
 
@@ -660,7 +692,7 @@
 
     <!-- Paket Detay Modalı -->
     <div class="modal-overlay" id="packageModal">
-        <div class="modal-dialog" style="max-width: 720px;">
+        <div class="modal-dialog" style="max-width: 780px;">
             <div class="modal-header">
                 <div class="modal-title-group">
                     <h3 class="modal-title" id="modalPkgName">Paket Adı</h3>
@@ -668,28 +700,64 @@
                 </div>
                 <button class="modal-close-btn" id="modalCloseBtn" aria-label="Kapat">&times;</button>
             </div>
-            <div class="modal-body" id="modalPkgBody">
-                <!-- Dinamik detaylar buraya gelir -->
+
+            <!-- Modal Sekme Çubuğu -->
+            <div class="modal-subnav">
+                <button type="button" class="modal-tab-btn active" data-modaltab="modalViewOverview">📋 Genel & Bağımlılıklar</button>
+                <button type="button" class="modal-tab-btn" data-modaltab="modalViewFiles">📁 Dosya Ağacı (<span id="modalFilesCountBadge">0</span>)</button>
+                <button type="button" class="modal-tab-btn" data-modaltab="modalViewControl">📄 Debian Control</button>
             </div>
 
-            <!-- Bağımlılık Ağacı Görselleştirici -->
-            <div class="dep-tree-container" id="modalDepContainer" style="padding: 0 1.5rem 1.5rem 1.5rem;">
-                <div class="dep-tree-header">
-                    <h4 class="dep-tree-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="18" cy="5" r="3"></circle>
-                            <circle cx="6" cy="12" r="3"></circle>
-                            <circle cx="18" cy="19" r="3"></circle>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                        </svg>
-                        <span>Paket Bağımlılık Ağacı</span>
-                    </h4>
-                    <span class="badge badge-emerald" id="modalDepSummary">0 Bağımlılık</span>
+            <!-- Görünüm 1: Genel Bilgiler & Bağımlılıklar -->
+            <div class="modal-view active" id="modalViewOverview">
+                <div class="modal-body" id="modalPkgBody">
+                    <!-- Dinamik detaylar buraya gelir -->
                 </div>
-                <div id="modalDepTreeContent">
-                    <!-- Bağımlılık nodeları dinamik yüklenir -->
+
+                <!-- Bağımlılık Ağacı Görselleştirici -->
+                <div class="dep-tree-container" id="modalDepContainer" style="padding: 0 1.5rem 1.5rem 1.5rem;">
+                    <div class="dep-tree-header">
+                        <h4 class="dep-tree-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="18" cy="5" r="3"></circle>
+                                <circle cx="6" cy="12" r="3"></circle>
+                                <circle cx="18" cy="19" r="3"></circle>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                            </svg>
+                            <span>Paket Bağımlılık Ağacı</span>
+                        </h4>
+                        <span class="badge badge-emerald" id="modalDepSummary">0 Bağımlılık</span>
+                    </div>
+                    <div id="modalDepTreeContent">
+                        <!-- Bağımlılık nodeları dinamik yüklenir -->
+                    </div>
                 </div>
+            </div>
+
+            <!-- Görünüm 2: Paket İçi Dosya Gezgini -->
+            <div class="modal-view" id="modalViewFiles" style="display: none; padding: 1.25rem 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; gap: 0.75rem; flex-wrap: wrap;">
+                    <div style="position: relative; flex: 1; min-width: 200px;">
+                        <input type="text" id="modalFileSearchInput" placeholder="Paket içindeki dosyalarda ara..." style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.45rem 0.85rem; color: #fff; font-size: 0.85rem;">
+                    </div>
+                    <span class="badge badge-primary" id="modalFilesSizeBadge">0 KB</span>
+                </div>
+                <div class="pkg-files-tree" id="modalFilesTreeList">
+                    <div class="text-center text-muted" style="padding: 2.5rem;">Dosyalar taranıyor...</div>
+                </div>
+            </div>
+
+            <!-- Görünüm 3: Control Dosyası -->
+            <div class="modal-view" id="modalViewControl" style="display: none; padding: 1.25rem 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">DEBIAN/control kaynak metni:</span>
+                    <button class="copy-btn" id="btnCopyControlText" title="Control Metnini Kopyala">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span>Kopyala</span>
+                    </button>
+                </div>
+                <pre class="control-code-box"><code id="modalControlRaw">Control bilgisi yükleniyor...</code></pre>
             </div>
 
             <div class="modal-footer">
@@ -702,6 +770,35 @@
                     <span>.deb İndir</span>
                 </a>
                 <button class="btn btn-secondary" id="modalCloseFooterBtn">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Token & Güvenlik Ayarları Modalı -->
+    <div class="modal-overlay" id="apiTokenModal">
+        <div class="modal-dialog" style="max-width: 480px;">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h3 class="modal-title">🔐 REST API & Güvenlik Ayarları</h3>
+                </div>
+                <button class="modal-close-btn" id="modalApiCloseBtn" aria-label="Kapat">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Paket yükleme (<code>/api/upload</code>) ve metrik sıfırlama (<code>/api/metrics/reset</code>) işlemlerini korumak için API Token tanımlayabilirsiniz.
+                </p>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.82rem; color: #fff; margin-bottom: 0.4rem; font-weight: 600;">API Token (Bearer / X-API-Key):</label>
+                    <input type="password" id="inputApiToken" placeholder="API tokeninizi yapıştırın..." style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.6rem 0.85rem; color: #fff; font-family: var(--font-mono); font-size: 0.9rem;">
+                </div>
+                <div id="apiTokenTestResult" style="display: none; margin-bottom: 1rem; font-size: 0.85rem; padding: 0.6rem 0.8rem; border-radius: 6px;"></div>
+                <div style="background: rgba(255,255,255,0.03); border: 1px dashed var(--border-color); border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">
+                    💡 Sunucuda token zorunluluğu kılmak için ana dizine <code>.api_token</code> dosyası oluşturabilir veya <code>APT_REPO_API_TOKEN</code> çevre değişkenini tanımlayabilirsiniz.
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: space-between;">
+                <button class="btn btn-secondary btn-sm" id="btnClearApiToken" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;">Jetonu Sil</button>
+                <button class="btn btn-primary btn-sm" id="btnSaveApiToken">Kaydet & Doğrula</button>
             </div>
         </div>
     </div>

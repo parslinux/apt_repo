@@ -291,15 +291,24 @@ body {
     backdrop-filter: var(--glass-blur);
     border: 1px solid var(--border-color);
     border-radius: 14px;
-    padding: 0.85rem 1.2rem;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-main-row {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1.5rem;
     align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
 }
 
 .search-input-group {
     flex: 1;
+    min-width: 260px;
     position: relative;
     display: flex;
     align-items: center;
@@ -309,13 +318,14 @@ body {
     position: absolute;
     left: 14px;
     color: var(--text-muted);
+    pointer-events: none;
 }
 
 .search-input-group input {
     width: 100%;
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--border-color);
-    padding: 0.7rem 1rem 0.7rem 2.6rem;
+    padding: 0.7rem 2.2rem 0.7rem 2.6rem;
     border-radius: 10px;
     color: #fff;
     font-family: inherit;
@@ -329,10 +339,39 @@ body {
     box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
+.search-clear-btn {
+    position: absolute;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-muted);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.search-clear-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: #fff;
+}
+
+.filter-select-group {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 .filter-select-group select {
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--border-color);
-    padding: 0.7rem 1.2rem;
+    padding: 0.7rem 1.1rem;
     border-radius: 10px;
     color: var(--text-primary);
     font-family: inherit;
@@ -344,6 +383,61 @@ body {
 
 .filter-select-group select:focus {
     border-color: var(--primary);
+}
+
+.filter-secondary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.arch-filter-pills {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.arch-pill-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-right: 0.25rem;
+    font-weight: 500;
+}
+
+.arch-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-mono);
+}
+
+.arch-pill:hover {
+    background: rgba(99, 102, 241, 0.2);
+    color: #fff;
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.arch-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.filter-results-info {
+    font-size: 0.85rem;
 }
 
 /* Paket Kartları Grid */
@@ -753,6 +847,121 @@ body {
     justify-content: flex-end;
     gap: 0.75rem;
     background: rgba(0, 0, 0, 0.2);
+}
+
+/* Modal Alt Sekmeleri (Subnav) */
+.modal-subnav {
+    display: flex;
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.35rem 1rem 0 1rem;
+    gap: 0.5rem;
+    overflow-x: auto;
+}
+
+.modal-tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    border-radius: 6px 6px 0 0;
+}
+
+.modal-tab-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.modal-tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.modal-view {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+/* Dosya Ağacı Gezgini (File Tree) */
+.pkg-files-tree {
+    background: rgba(5, 8, 16, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    max-height: 380px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+}
+
+.pkg-file-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.15s ease;
+}
+
+.pkg-file-row:hover {
+    background: rgba(99, 102, 241, 0.12);
+}
+
+.pkg-file-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #f1f5f9;
+}
+
+.pkg-file-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.pkg-file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pkg-file-name.is-dir {
+    color: #38bdf8;
+    font-weight: 600;
+}
+
+.pkg-file-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Control Kod Kutusu */
+.control-code-box {
+    background: rgba(5, 8, 16, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    max-height: 380px;
+    overflow: auto;
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    color: #a5b4fc;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 /* Toast Bildirimleri */

@@ -6,15 +6,15 @@ Architecture: all
 Version: 1.0.0
 Replaces: pulseaudio, pulseaudio-module-bluetooth, pardus-common-desktop
 Depends: pars-branding, dbus-user-session, dbus-x11, desktop-base, gvfs, gvfs-backends, gvfs-fuse, xdg-user-dirs, xdg-utils, pipewire, pipewire-audio, pipewire-alsa, pipewire-pulse, wireplumber, libspa-0.2-bluetooth, libspa-0.2-modules, fonts-ubuntu, fonts-noto-core, fonts-noto-color-emoji, fonts-dejavu-core, fonts-liberation2, xorg, xserver-xorg-input-all, xserver-xorg-video-all, network-manager, bluez, wireless-tools, wpasupplicant
-Recommends: alsa-utils, btrfs-progs, command-not-found, curl, dnsutils, dosfstools, eject, f2fs-tools, fastfetch, fonts-font-awesome, fzf, iw, libcanberra-gtk3-module, lz4, net-tools, ntfs-3g, p7zip-full, printer-driver-all, pulseaudio-utils, tree, unzip, webp-pixbuf-loader, xfsprogs, zip
+Recommends: alsa-utils, btrfs-progs, command-not-found, curl, dnsutils, dosfstools, eject, f2fs-tools, fonts-font-awesome, fzf, iw, libcanberra-gtk3-module, lz4, net-tools, ntfs-3g, p7zip-full, printer-driver-all, pulseaudio-utils, tree, unzip, webp-pixbuf-loader, xfsprogs, zip
 Conflicts: pulseaudio, pulseaudio-module-bluetooth
 Breaks: pulseaudio, pulseaudio-module-bluetooth, pardus-common-desktop
 Filename: pool/main/p/pars-base/pars-base_1.0.0_all.deb
-Size: 3240
-MD5sum: 3817949ee7c37f08bc92ef8ff808ea1a
-SHA1: 1aa1e97b9d67b20edd27f0b7bd321928ecd90cfe
-SHA256: 9dc0ccf3b8f8525934b264519833d0e646edf7729d61e5af4f3439b2bc22038e
-SHA512: e6fb92542ef277f943d0beedef78d9c6a26b7b66650ae531cf08b52bacb73f7ef32eac40a0e6cdfb22fa4c358a14a2c6d5ee3ebd0f0d2f773ff917183bb3cc05
+Size: 3228
+MD5sum: 998d71ce1b946ca8626e00a401d4d385
+SHA1: 449a3024699b0d1ecfa77f4581e34483eaa3df49
+SHA256: 594e6308d91303c0e497da9c9037362c60a7df1345557d58b4121ab6210252d7
+SHA512: b4955cc4166326f0a0ce434e293926b90301ff5747a7abdbcb780b861874240496cb6d0b37c083f86789c525a750e5abf78cb91c9c152c2b7785803cf84c2f79
 Description: Pars Linux Base Metapackage (Core system, Pipewire audio, fonts)
  This metapackage provides the core foundation of the Pars Linux operating
  system. It depends on essential system libraries, the modern Pipewire
@@ -31,15 +31,15 @@ Maintainer: Pars Linux Developers <dev@parslinux.org>
 Architecture: all
 Version: 1.0.0
 Replaces: pardus-backgrounds
-Depends: ${misc:Depends}, parslinux-gnome-settings | pardus-gnome-settings, parslinux-grub-theme | pardus-bilge-grub-theme, desktop-base
-Recommends: adw-gtk3-theme, fonts-ubuntu, fastfetch, parslinux-about, plymouth, plymouth-themes
+Depends: parslinux-gnome-settings | pardus-gnome-settings, parslinux-grub-theme | pardus-bilge-grub-theme, desktop-base
+Recommends: fonts-ubuntu, plymouth, plymouth-themes
 Breaks: pardus-backgrounds
 Filename: pool/main/p/pars-branding/pars-branding_1.0.0_all.deb
-Size: 378694
-MD5sum: 960a926481b6f231482781b0629712dd
-SHA1: a9829154373d918743b801c7e23b37325a9c1609
-SHA256: 8868ec3a8fe9f0e298f1cbb3a3b89bb7f0f6c70ff260ca75eaace6fb5c74d65e
-SHA512: a3c2b7a7556f2530ab8ac0db1c0ee0362fb39014463a53f1f86e5e19d445a22f746d2cd5216b84bc13ef8b6510f340d992a2156f8178768a61ce586717bfd8fa
+Size: 378650
+MD5sum: e8edf6651247892e856262c96eccc239
+SHA1: 47307279e103d02bd0aa04f9d2aa3801e38335a0
+SHA256: 3a41489a908fed3f8a4f9640e7f1b310d4bd87003b4d8e97c568a4abdb82f49d
+SHA512: 0787f988e6dc2a5f7595e1f1a53ca3046285c8ebbc1513b713fa37ed94a9705cb40a5b3eb0bfb241aea5c40d5177b498bfb8c9b5b2b0aa1dbef4125ba51972ca
 Description: ParsLinux Brand Identity, Wallpapers and Theme Metapackage
  This package provides the official visual identity for ParsLinux:
   * ParsLinux official wallpapers and GNOME background settings
@@ -176,15 +176,15 @@ Recommends: pars-about | pardus-about, parslinux-gnome-greeter | pardus-gnome-gr
 Conflicts: pardus-gnome-desktop
 Breaks: pardus-gnome-desktop
 Filename: pool/main/p/pars-desktop-gnome/pars-desktop-gnome_1.0.0_all.deb
-Size: 1196
-MD5sum: eb17b03f128b42a805f1182bca75a13b
-SHA1: 531f5b1a94de54e53ddcc9022129daf2f9f5ab2b
-SHA256: 2d624327ecec9f7124f39355e3b66b9ac19f4dd581912c35e71159177d6bbba7
-SHA512: b34d615c1c4e3e8b3545d72f101c1d45f0faf1a69422d0f9b2723af38e04126c13fb9c592278408505f3a9760fb2dd484fde1d829b29dac70db3dcf362ff04fa
+Size: 1184
+MD5sum: 193c54fa19ab8656595c4faf712922b8
+SHA1: 5725d0e2b0e2491532375b28aaa81aa3ae84e49e
+SHA256: 03bb9682b5f8b8dd641a25bb9b1029319508e80d1379a7fc2a1819ac5fcb3cfc
+SHA512: 46e9e44955c1c15a52a0f47cb40b10574573386586791b2adeb464d879ca608347b77a1dd228aa3a0c4eeb37c4a6e475da523285813dab930705649d4b83c9ea
 Description: Pars Linux GNOME Desktop Metapackage
  This metapackage installs the complete Pars Linux GNOME desktop environment.
- It connects the core system foundation (pars-base) with the modern GNOME Shell,
- Pars visual configurations, and essential system utilities including Greeter,
+ It connects the core system foundation (pars-base) with the modern GNOME Shell
+ Pars visual configurations, and essential system utilities including Greeter
  Pars About, Pars Update, Software Center, and Image Writer.
 
 Package: pars-dev
@@ -404,11 +404,11 @@ Version: 0.8.2
 Depends: python3, python3-gi, gir1.2-gtk-3.0, gir1.2-glib-2.0, gir1.2-notify-0.7, gir1.2-pango-1.0
 Recommends: gvfs-fuse
 Filename: pool/main/p/pars-mycomputer/pars-mycomputer_0.8.2_all.deb
-Size: 226042
-MD5sum: d2cf8b57d9d17e1f8003f828bd4d0ee7
-SHA1: d9f76e994913745842b179787daa0037b79014dd
-SHA256: b11d3667b0117bb53c0a35dcde8dd7d193779d63b796423f55cb6bd68b30d6aa
-SHA512: 8a2489bb81685995020d2baf2dffc11e51e2560616c06f82681d249f81b3d9916bea8537cd593671f90812e081e3ae908b2802380eef77cdd7ac33a5442d1312
+Size: 226034
+MD5sum: 4037fa9e09d6e40db107681bea5fedbd
+SHA1: 2aafffb712cd50f8fa8bd4c78c571da39d195fa9
+SHA256: 951ba715be7dc2214f2bac2dfb3da6a4fb2de35cdf6db1df0eed080254935fdf
+SHA512: b83cb360fed37d803141ff3dc6cb5ea6958a08fce5a0b3d1e49fc5b0f90d45dd29b1e2fee8b7adfbed3b2817ec08ddef1b5d119dbd2c83920b15479880e3ccd7
 Description: Pars My Computer - UI for disk information and management
  My Computer, modern user interface for disk information and management.
 
@@ -417,16 +417,16 @@ Priority: optional
 Section: admin
 Maintainer: ParsLinux Team <contact@parslinux.org>
 Architecture: all
-Version: 26.04.1
+Version: 1.0.0
 Depends: python3 (>= 3.10), python3-gi, python3-gi-cairo, gir1.2-gtk-4.0, gir1.2-adw-1, python3-psutil, gettext, policykit-1
-Filename: pool/main/p/pars-setup/pars-setup_26.04.1_all.deb
-Size: 300548
-MD5sum: abade9b99585a88eec3bd2bc4c542c5f
-SHA1: 97f96f45f5b4497a3999148cab3c9fec59e9eb3e
-SHA256: 2ae72159bc08f94c10f0fdeeeee567e08180f9c67da14ac0d4f1596ac3ff6cde
-SHA512: f5943904ba308872767de18a0578f0b42465dede89c7ab3e6dace87a79bb659fdd03f1fc7dcad81d030c4ffe60e58ab132baf15fe1e9a35e3225ecc8b734046e
+Filename: pool/main/p/pars-setup/pars-setup_1.0.0_all.deb
+Size: 306296
+MD5sum: 95151fb3c0e04ef50a6792c2a1c03472
+SHA1: a95b4f775dba3a34d6e9c2d64685f32fe007521b
+SHA256: 1cb9d866a7a22a3932b59fd1e5d966e4240268166732c9122118d6b42ce1aa07
+SHA512: 2678b9cefad4d5499d9e187967a1b0eaefdd4b0b176cdcacca62e67e18b1bde8f33b77f158d03476f97eb013ab485350ac926c09c19009fe9f88b1d21b69e4f2
 Description: ParsLinux OS Kurulum Sihirbazı
- ParsLinux 26.04 LTS ve modern Linux dağıtımları için Libadwaita
+ ParsLinux ve modern Linux dağıtımları için Libadwaita
  ve GTK4 tabanlı, Pardus ve Calamares standartlarında işletim sistemi
  kurulum sihirbazı.
 Homepage: https://parslinux.org
@@ -438,18 +438,18 @@ Maintainer: Pars Linux Developers <dev@parslinux.org>
 Architecture: all
 Version: 1.2.0-parslinux1
 Replaces: pardus-boot-repair (<= 1.1.0)
-Provides: pardus-boot-repair (= ${binary:Version})
+Provides: pardus-boot-repair
 Depends: libc6, python3 (>= 3.8), python3-gi, gir1.2-gtk-3.0, gir1.2-handy-1, gir1.2-vte-2.91, libc6, live-boot, zip, cryptsetup, lvm2, btrfs-progs, e2fsprogs, dosfstools, efibootmgr, parted
 Conflicts: pardus-boot-repair
 Filename: pool/main/p/parslinux-boot-repair/parslinux-boot-repair_1.2.0-parslinux1_all.deb
-Size: 61440
-MD5sum: a0716c61e50b0e194d000fdd84281000
-SHA1: 6454b700e540038b1e3ea20068cae002357256d7
-SHA256: 77cd5a6d38d55efcb34cc15efa827c50bd4e9740db370d4a609bec75c68db8e0
-SHA512: ed8a59f02d09120f0fa68fadf2ab3173da69382bfb5ce9d46ff42446d94bd9e924ae897e147a0f253550ea1d2097fc4811f0a6944792c045dd4ac7e65bc1607a
+Size: 61412
+MD5sum: 62dde89a81a5a122dc4c7fe8d7b8dc40
+SHA1: a6e11c0903e7f82578a39f6a85396e14e1012ef2
+SHA256: 785abb236980f87c80ee5b12e37fb116c54e14d7f9dd050957730bdaa0e259e3
+SHA512: 0e6ee5be60d5893a163b532147aa3a7c98511935a4a74777baaac00e1e4a747690382ff7ceb80e8a312e2500646c4449842ba671849e1887937f8f2ae73b6a63
 Description: Pars Linux boot and system repair tool
  Pars Linux Boot Repair provides graphical and automated tools to repair
- damaged GRUB and EFI bootloaders, perform filesystem checks (ext4, btrfs),
+ damaged GRUB and EFI bootloaders, perform filesystem checks (ext4, btrfs)
  chroot into installed rootfs systems, reset user passwords, and fix
  broken APT packages.
 Homepage: https://parslinux.org
@@ -461,11 +461,11 @@ Maintainer: Pars Linux Team <dev@parslinux.org>
 Architecture: all
 Version: 2.0.0
 Filename: pool/main/p/parslinux-editor/parslinux-editor_2.0.0_all.deb
-Size: 976
-MD5sum: d98af31b36a1f898246e5f4a7b35b20e
-SHA1: 07043ec275ae256b93fbc7ec4a96078c864ac71a
-SHA256: f809baf767b8a703b749ed1299455b99f92fee5371434d4fd158dc2b7eddc263
-SHA512: e9d3f65be88e97d7930e1fe8f182ba3d23b19e8312cc335ca3344c5ce6a55dcf0387674b3018d45169c7c58e32e71b099d8146b67b8a6f2cf839620f21232965
+Size: 964
+MD5sum: 4a52df13bcab1981070ea96ec6234fa3
+SHA1: af56293f9cb86ce0a901de798137e6bbacc93d7f
+SHA256: 82afe4d07bba4607062e26a8077be2c160b1e91df09dd0954a4d65e40980d244
+SHA512: 935b5a6b026864e23574dcb6b849d42a717d624c81d5e71a04426eee15d6676a630b66217f275d5aba6b4e847ed96faa5c64a9deef0039976bac10a41e446faa
 Description: Modern lightweight text editor
  Full description for parslinux-editor on Pars Linux.
 Homepage: https://parslinux.org
@@ -476,16 +476,35 @@ Section: gnome
 Maintainer: Pars Linux Developers <dev@parslinux.org>
 Architecture: all
 Version: 1.0.0
-Depends: fonts-ubuntu, adw-gtk3-theme, parslinux-gnome-icon-theme | pardus-gnome-icon-theme
+Depends: fonts-ubuntu
 Filename: pool/main/p/parslinux-gnome-settings/parslinux-gnome-settings_1.0.0_all.deb
-Size: 39028
-MD5sum: 37beb16d33889cb126079a0fea48fbce
-SHA1: 96a10f1caafb47b7252b15b01d21f523b221d3a7
-SHA256: 946d10f4c983677c460ea9d160c363ffe95caa20edc81a114a1758527f8aa24a
-SHA512: dd5d229622bd2ef180944c2a66854a2ba2f5f36d899d5341b5e049ad4dce07f8b05e22128e466f8f9aa81cfe595cb17f74449601967f5215e601b81091a105ee
+Size: 38996
+MD5sum: 15cea829a1e926f5b1acb6d71cdfa9ed
+SHA1: acc622066ec1755d5dc6bc05fbf20bcd7bd425c5
+SHA256: ba169d01a8463683ea8c2e76dbdb3587c12c32b0de2471396963c05e78fe62b5
+SHA512: 0232f6b5eaab0327c27818b180956b56626f52dbd126e716c0f11ba52a929f0dcb7532e9174cd4270cc02a0979461b085a51cc323a23877563921797115c0316
 Description: default settings for the Pars Linux GNOME desktop
  This package contains the default settings used by Pars Linux.
 Homepage: https://github.com/parslinux/parslinux-gnome-settings
+
+Package: parslinux-grub-theme
+Priority: optional
+Section: utils
+Maintainer: ParsLinux Dev Team <dev@parslinux.org>
+Architecture: all
+Version: 1.0.0
+Provides: grub-theme
+Depends: grub2-common
+Recommends: grub-pc | grub-efi-amd64 | grub-efi-ia32 | grub-efi-arm64
+Filename: pool/main/p/parslinux-grub-theme/parslinux-grub-theme_1.0.0_all.deb
+Size: 809500
+MD5sum: 54b528c72f2e142c3ef7f73914e82c8e
+SHA1: f930d1dd379aebed3a57a76e430cc6d3e1a8e333
+SHA256: f49f160671279efc56cacdcc8fd489d35dcf7fc3b858e9c2b5924c4c6d128c27
+SHA512: 64d137612caaff48bd3f244c5c45a2f1d82775bf1e103f4feeb8f1a218719141621ac41b86e98b92672cc9617025c799da92d6910f799e2fdec3f2a9d7e2c51e
+Description: ParsLinux GRUB Theme
+ A modern, sleek and elegant GRUB bootloader theme featuring the
+ ParsLinux Anatolian leopard branding, high-contrast dark aesthetic, and comprehensive operating system icons.
 
 Package: parslinux-hello
 Priority: optional
@@ -496,11 +515,11 @@ Architecture: all
 Version: 1.0.0
 Depends: libc6 (>= 2.34), bash
 Filename: pool/main/p/parslinux-hello/parslinux-hello_1.0.0_all.deb
-Size: 816
-MD5sum: 51c02b40cacf3e51f915052bb65501b7
-SHA1: bc58f9fe56e06f184d3a8b79dbf196dd62acc4ca
-SHA256: 35da4960379f5269213a136e1bdf55ff0153b2a3d83d95e67aae213121084313
-SHA512: 27ca8169c67cba5ae344515e74a41d8a51827c244ca5d1c79e09b0c1dc391280d6d81154caae34aa78ae29489e8f5f783755523150f3c4292c8aa6867391e06d
+Size: 808
+MD5sum: b23be42a0e095f3a953087b75b7a2d16
+SHA1: 40a4670af1b2f4b32d07815fb03b7937e2fd22d3
+SHA256: 94c35d33771301631893ca29c834c22af123ca68874660cf98c8c63afe94d13e
+SHA512: 79d4a98beaf83efe4e30d223ca71124410efc6f430c1f09065b5e3ab275bba89f3eb10ffe1c58d4b2a0cf629a5ea96ce95c260870b54be5185d4323bc50bc271
 Description: Pars Linux Hello Test Package
  A test Debian package to demonstrate parslinux-package-installer.
  It includes test files and dependency specifications.
@@ -513,17 +532,16 @@ Maintainer: ParsLinux Dev Team <dev@parslinux.org>
 Architecture: all
 Version: 2026.1
 Replaces: pardus-menus (<= 2023.0)
-Provides: pardus-menus (= ${binary:Version})
-Depends: ${misc:Depends}
+Provides: pardus-menus
 Conflicts: pardus-menus
 Filename: pool/main/p/parslinux-menus/parslinux-menus_2026.1_all.deb
-Size: 103874
-MD5sum: bd6c82610c2bcf5bac4a8135eb6efb2e
-SHA1: 7c992154bb021e6d98b1ad87cfb8f56db2bbff1b
-SHA256: a1dd501335250500bb30a97a31f7545d770ed98effa1540b6bb09546532407ca
-SHA512: b0905e512d5c1618c8330554fb48a6497b25d6eb3570231cdea7f96624c7e3977c174eefc6355bd443b038caa23d0ba60d2fbd4475e585e1a7c7593806f29067
+Size: 103834
+MD5sum: d3f8f15273aacfed0a1ce6f481844889
+SHA1: 2b9e5f6ffe58c94be88725d0980744f7c2fefa80
+SHA256: e3cca2629d03333ac83e0cb83d31652b1abcf4ac7dbdc0a3be6bfed158d2afd0
+SHA512: 1f462b9a9be770f5383966d7aba75f5bf1520373fdb09d5e0fe480980340e247e3bcee9e3babd34c2e0023407538c2170e268adda74282ff0ab577da3ad1700d
 Description: ParsLinux XDG Menus and desktop categories
- This package provides standard FreeDesktop.org (XDG) menu definitions,
+ This package provides standard FreeDesktop.org (XDG) menu definitions
  desktop directory files and category icons for ParsLinux desktop environments.
  .
  It adds the dedicated "Pars Araçları" (Pars Tools) application category
@@ -533,19 +551,19 @@ Homepage: https://github.com/parslinux/parslinux-menus
 Package: parslinux-nvidia-installer
 Priority: optional
 Section: admin
-Maintainer: ParsLinux Developers <dev@parslinux.org> debhelper-compat (= 13), meson, ninja-build, gettext, pkg-config,
+Maintainer: ParsLinux Developers <dev@parslinux.org>
 Architecture: all
 Version: 1.0.0-1
 Replaces: pardus-nvidia-installer
 Provides: pardus-nvidia-installer
-Depends: ${shlibs:Depends}, ${misc:Depends}, python3, python3-gi, gir1.2-gtk-3.0, gir1.2-vte-2.91, gir1.2-polkit-1.0, python3-apt, pciutils, gnupg, 
+Depends: python3, python3-gi, gir1.2-gtk-3.0, gir1.2-vte-2.91, gir1.2-polkit-1.0, python3-apt, pciutils, gnupg
 Conflicts: pardus-nvidia-installer
 Filename: pool/main/p/parslinux-nvidia-installer/parslinux-nvidia-installer_1.0.0-1_all.deb
-Size: 72590
-MD5sum: c256470884874b35ec280463d37579db
-SHA1: e1d40dc45899564eeafd645167f46947a9f592dd
-SHA256: cd3dbf888b71e439191374e3bdf566f5f0506cd05bee4b68146c78ee4384c575
-SHA512: 0f373d5e61716c66c51e0aa86f255f01f55cabc0f72323dead22e75d81d0539a63b74db6e3fb6e8aa2735ba5dec7355b650be8d3e85461c0dc2e07edd8668a83
+Size: 72514
+MD5sum: e82fa8a2810d9a4a4dc027729b077649
+SHA1: 644153db7e3ab77df824774b98ff4ade91f9b16b
+SHA256: 99cb49bc40364b4240c520d417445674d067f1adb88d4ba1a335cd09658f6b23
+SHA512: bea83280428cc44de5c0dd0d41d966ada8bebe8948f8b41e574c61b0173985cccb182483dc834cb24b2c8d200b62f71123c2d430b73203c10fc2d6345fbed423
 Description: ParsLinux NVIDIA graphics driver installer and GPU manager
  A graphical tool that helps you install and manage NVIDIA GPU drivers
  on ParsLinux. It detects your hardware, suggests fitting proprietary
@@ -562,11 +580,11 @@ Replaces: pardus-gnome-shortcuts
 Depends: python3, python3 (>= 3.8), gir1.2-gtk-4.0, gir1.2-adw-1, python3-gi, dconf-gsettings-backend | gsettings-desktop-schemas
 Breaks: pardus-gnome-shortcuts
 Filename: pool/main/p/parslinux-shortcuts/parslinux-shortcuts_0.1.0_all.deb
-Size: 2504594
-MD5sum: c28a74e150a15e2d4255e24ae2ddb124
-SHA1: e0e4cf24982c76b507b230ebd0e202096cf2742c
-SHA256: 8babd55ec3c181dd96e2f015328fcc4f05c7452dcea13ff506988c5d2ed44df1
-SHA512: 2fb40efbfd741e681c44d69538370201592e31ee8c18f8959123a724a8779889ac3239c6ffb76630c7f71a1cb48f67a5b4d78b6a19b5357e548c165ab67de0cf
+Size: 2504578
+MD5sum: df3ee5ae0f7a87f1339d6e5b908e8ad8
+SHA1: 4f2d8ba4b6b7fc85b6ab8c2c50a297379a769bd5
+SHA256: 7f817ca17921c3422fdffab1a2130a9f4dc420920c2c92bd36fff168497adf47
+SHA512: 91b88ef1f9ab0ff665ad4560a77410076449703d25242508a80126a7f2050327499091a5bf09e607e5f2d37e0a1f0f53ae973d5078adeba5d4947c403120c7af
 Description: Pars Linux Keyboard Shortcuts Guide
  Pars Linux shortcuts guide and greeter companion application that shows
  keyboard shortcuts categorized with search and visual key combinations.
@@ -579,11 +597,11 @@ Maintainer: Pars Linux Team <dev@parslinux.org>
 Architecture: all
 Version: 1.0.0
 Filename: pool/main/p/parslinux-theme/parslinux-theme_1.0.0_all.deb
-Size: 904
-MD5sum: 50c051dfdfb62dc96c02b6e34af52e0d
-SHA1: a19e633a75e4500be2abad02a24f7a15b859acdb
-SHA256: 22f496d1c8b174046dcecb484e0feeb31b4174261c42a23fa437bffe0697f1ab
-SHA512: 5377e8a2f23d3c78282a2685087769c911dfbc0568e1e8cf2d1900826157f74c865e45f896bcc8b5d0e48d25cdaf05ca0ed1394d1f31a8c0ee6443bd13c02307
+Size: 896
+MD5sum: cb1994d945b5c6f7ec2220c4e4fd75e1
+SHA1: 60b3b4ea3c6c13e3c82e82f9148706a7df488747
+SHA256: 55bc2d274d197fa15eb2d3ff6f06aa61bef25cb308db52d9615a55aa95acd48a
+SHA512: c0a329d2483f5b933ea2b5289c16f9d2bd5f27084976913d438a7620f3a411d5e9c8bee2bd1b4bc799480a6481b840caab854953f8c2e0356bc258edb479e36d
 Description: Official dark theme for Pars Linux
  Full description for parslinux-theme on Pars Linux.
 Homepage: https://parslinux.org

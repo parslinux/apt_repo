@@ -316,12 +316,172 @@
             color: var(--primary);
             text-decoration: none;
         }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--surface-border);
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .nav-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-title {
+            font-weight: 800;
+            color: #fff;
+            font-size: 1.15rem;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-sub {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-left: 0.4rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 0.95rem;
+            border-radius: 0.5rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn-primary {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: #a5b4fc;
+        }
+
+        .nav-btn-primary:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .nav-btn-secondary {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+        }
+
+        .nav-btn-secondary:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--surface-hover);
+        }
+
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 7, 13, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 1rem;
+            max-width: 620px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            animation: modalFadeIn 0.25s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-size: 0.88rem;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            gap: 0.6rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Üst Gezinti Çubuğu -->
+        <nav class="top-nav">
+            <a href="#" class="nav-brand">
+                <div class="nav-logo">🐆</div>
+                <div>
+                    <span class="nav-title">ParsLinux</span>
+                    <span class="nav-sub">Resmi APT Deposu</span>
+                </div>
+            </a>
+            <div class="nav-actions">
+                <a href="parslinux-archive-keyring.gpg" download class="nav-btn nav-btn-primary">
+                    🔑 GPG Keyring İndir
+                </a>
+                <a href=".well-known/openpgpkey/hu/gkux3qirko9oqgy8uy54k78iopxuno96" target="_blank" class="nav-btn nav-btn-secondary" title="RFC 9580 Web Key Directory">
+                    🌐 WKD Anahtarı
+                </a>
+                <a href="https://github.com/parslinux/apt_repo" target="_blank" class="nav-btn nav-btn-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </div>
+        </nav>
+
         <header>
-            <div class="badge">🐆 ParsLinux 0.1</div>
+            <div class="badge">🐆 ParsLinux 0.1 & Bookworm</div>
             <h1>Resmi APT Paket Deposu</h1>
             <p class="subtitle">ParsLinux ekosistemine ait tüm çekirdek masaüstü, kurulum aracı, temalar ve sistem uygulamalarının resmi dağıtım merkezi.</p>
         </header>
@@ -1013,6 +1173,101 @@ sudo apt update`
             const countEl = document.getElementById('pkg-count');
             if (countEl) countEl.innerText = visibleCount;
         }
+
+        // Modal ve Kart Etkileşimi
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotify');
+            const msgEl = document.getElementById('toastMsg');
+            if (!toast || !msgEl) return;
+            msgEl.innerText = msg;
+            toast.style.display = 'flex';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        }
+
+        function openPkgModal(card) {
+            const name = card.getAttribute('data-name');
+            const desc = card.getAttribute('data-desc');
+            const verEl = card.querySelector('.pkg-version');
+            const version = verEl ? verEl.innerText : '';
+            const metaEl = card.querySelector('.pkg-meta span');
+            const metaText = metaEl ? metaEl.innerText : '';
+            const dlLink = card.querySelector('.dl-btn');
+            const href = dlLink ? dlLink.getAttribute('href') : '#';
+
+            document.getElementById('modalPkgTitle').innerText = name;
+            document.getElementById('modalPkgVerBadge').innerText = 'v' + version;
+            document.getElementById('modalPkgDesc').innerText = desc;
+            document.getElementById('modalInstallCmd').innerText = 'sudo apt install ' + name;
+            document.getElementById('modalMetaInfo').innerText = metaText;
+            document.getElementById('modalDownloadBtn').setAttribute('href', href);
+
+            document.getElementById('pkgModal').classList.add('active');
+        }
+
+        function closePkgModal() {
+            document.getElementById('pkgModal').classList.remove('active');
+        }
+
+        function copyModalInstallCmd() {
+            const cmd = document.getElementById('modalInstallCmd').innerText;
+            navigator.clipboard.writeText(cmd).then(() => {
+                showToast('Kurulum komutu panoya kopyalandı!');
+                const btn = document.getElementById('modalCopyBtn');
+                btn.innerText = 'Kopyalandı! ✓';
+                setTimeout(() => { btn.innerText = 'Kopyala'; }, 2000);
+            });
+        }
+
+        // Kartlara tıklama bağla
+        document.querySelectorAll('.pkg-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Eğer doğrudan indirme butonuna tıklandıysa modal açma
+                if (e.target.closest('.dl-btn')) return;
+                openPkgModal(card);
+            });
+        });
+
+        // Modal dışına tıklandığında kapat
+        const modalEl = document.getElementById('pkgModal');
+        if (modalEl) {
+            modalEl.addEventListener('click', (e) => {
+                if (e.target === modalEl) closePkgModal();
+            });
+        }
     </script>
+
+    <!-- Paket Detay Modalı -->
+    <div class="modal-backdrop" id="pkgModal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--surface-border);">
+                <div>
+                    <h3 id="modalPkgTitle" style="font-size: 1.25rem; font-weight: 700; color: #fff; font-family: 'JetBrains Mono', monospace;"></h3>
+                    <span id="modalPkgVerBadge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.75rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 9999px;"></span>
+                </div>
+                <button onclick="closePkgModal()" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 0.25rem 0.5rem; line-height: 1;">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <p id="modalPkgDesc" style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.5rem;"></p>
+                <div style="background: #060911; border: 1px solid #1e293b; border-radius: 0.75rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 600;">APT Kurulum Komutu:</span>
+                        <button id="modalCopyBtn" onclick="copyModalInstallCmd()" style="background: var(--primary); border: none; color: #fff; padding: 0.25rem 0.65rem; border-radius: 0.4rem; font-size: 0.75rem; cursor: pointer; font-weight: 600;">Kopyala</button>
+                    </div>
+                    <code id="modalInstallCmd" style="font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; color: #38bdf8; display: block; word-break: break-all;"></code>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                    <span id="modalMetaInfo" style="font-size: 0.82rem; color: #64748b;"></span>
+                    <a id="modalDownloadBtn" href="#" class="dl-btn" download>
+                        <span>⬇</span> .deb Paketini İndir
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Bildirimi -->
+    <div class="toast-notify" id="toastNotify">
+        <span>✓</span> <span id="toastMsg">Kopyalandı!</span>
+    </div>
 </body>
 </html>

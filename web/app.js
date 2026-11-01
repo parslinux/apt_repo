@@ -70,6 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (codeOneLineInstall) {
             codeOneLineInstall.textContent = `curl -sSL ${origin}/install.sh | sudo bash`;
         }
+
+        const codeWkdImport = document.getElementById('codeWkdImport');
+        if (codeWkdImport) {
+            codeWkdImport.textContent = `gpg --locate-keys repo@parslinux.org && gpg --export repo@parslinux.org | sudo gpg --dearmor --yes -o /etc/apt/keyrings/parslinux-archive-keyring.gpg`;
+        }
     }
 
     // 2. Sekme (Tab) Yönetimi
@@ -708,6 +713,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 10. GPG WKD (Web Key Directory) Durumu
+    async function loadWkdStatus() {
+        const badge = document.getElementById('wkdStatusBadge');
+        if (!badge) return;
+
+        try {
+            const res = await fetch('/api/wkd/status');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.enabled) {
+                    badge.textContent = '✅ WKD Aktif (RFC 9580)';
+                    badge.className = 'badge badge-emerald';
+                    badge.title = `Domain: ${data.domain} | Hash: ${data.hashes['repo@parslinux.org'] || ''}`;
+                } else {
+                    badge.textContent = '⚠️ WKD Pasif';
+                    badge.className = 'badge badge-amber';
+                }
+            } else {
+                badge.textContent = 'WKD Bilinmiyor';
+                badge.className = 'badge badge-secondary';
+            }
+        } catch {
+            badge.textContent = 'WKD Bağlantı Yok';
+            badge.className = 'badge badge-secondary';
+        }
+    }
+
     // 12. İndirme Analitiği ve Metrikleri Yükleme
     async function loadMetricsData() {
         try {
@@ -907,6 +939,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSetupCommands();
     loadDashboardData();
     loadWebhookStatus();
+    loadWkdStatus();
     loadMetricsData();
 });
 

@@ -236,6 +236,25 @@
                         </div>
                     </div>
 
+                    <!-- Adım 0B: WKD Otomatik Doğrulama -->
+                    <div class="setup-step">
+                        <div class="step-badge" style="background: #6366f1;">🌐</div>
+                        <div class="step-body">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <h4 class="step-title" style="margin-bottom: 0;">Web Key Directory (WKD) ile Otomatik Doğrulama (RFC 9580)</h4>
+                                <span class="badge badge-emerald" id="wkdStatusBadge">WKD Aktif</span>
+                            </div>
+                            <p class="step-desc">GnuPG ve modern APT istemcileri alan adı (WKD) üzerinden anahtarı doğrudan çekebilir:</p>
+                            <div class="code-box">
+                                <pre><code id="codeWkdImport">gpg --locate-keys repo@parslinux.org && gpg --export repo@parslinux.org | sudo gpg --dearmor --yes -o /etc/apt/keyrings/parslinux-archive-keyring.gpg</code></pre>
+                                <button class="copy-btn" data-copy="codeWkdImport" title="Kopyala">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Adım 1 -->
                     <div class="setup-step">
                         <div class="step-badge">1</div>

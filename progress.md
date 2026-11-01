@@ -85,8 +85,10 @@ Bu belge, APT Depo Yönetim Projesi'nin mevcut durumunu, tamamlanan adımların�
 
 ---
 
-## 🔮 Gelecek İyileştirmeler (Genişletme Fikirleri)
-
-- [ ] **GPG Web Anahtar Sunucusu (WKD - Web Key Directory):** İstemcilerin anahtarı `gpg --locate-keys` ile otomatik doğrulayabilmesi için `.well-known/openpgpkey/` WKD protokol desteği ve otomasyon betiği.
+- [x] **GPG Web Anahtar Sunucusu (WKD - Web Key Directory):**
+  - Modern GnuPG istemcilerinin anahtarı `gpg --locate-keys repo@parslinux.org` ile otomatik keşfetmesini sağlayan RFC 9580 protokol desteği.
+  - SHA-1 + zbase32 hash hesaplama algoritmasıyla (`gkux3qirko9oqgy8uy54k78iopxuno96`) hem doğrudan hem de alan adı tabanlı WKD yapısı (`scripts/setup_wkd.py`).
+  - Web kontrol panelinde canlı WKD durum denetleyicisi (`/api/wkd/status`), otomatik import komutları ve `manage.sh` menü entegrasyonu (Seçenek 16).
+  - Canlı GitHub Pages ortamında (`https://parslinux.github.io/apt_repo/.well-known/openpgpkey/`) ve yerel sunucuda anında erişim.
 - [ ] **Paket İndirme Zaman Serisi Grafiği (Chart.js / SVG):** Günlük/haftalık indirme trendlerini görselleştiren interaktif grafik.
 

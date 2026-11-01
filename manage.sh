@@ -45,6 +45,7 @@ show_menu() {
     echo -e "  ${MAGENTA}13)${NC}🐳 Docker Container Olarak Başlat (run_container.sh)"
     echo -e "  ${MAGENTA}14)${NC}🛑 Docker Container'ı Durdur (stop_container.sh)"
     echo -e "  ${BLUE}15)${NC} 📢 Webhook Bildirim Testi & Ayarları (notify_webhook.sh)"
+    echo -e "  ${CYAN}16)${NC} 🌐 GPG Web Anahtar Sunucusu (WKD) Kur & Doğrula (setup_wkd.py)"
     echo ""
     echo -e "  ${RED}0)${NC} ❌ Çıkış"
     echo -e "${BLUE}================================================================${NC}"
@@ -58,7 +59,7 @@ pause() {
 
 while true; do
     show_menu
-    echo -ne "Lütfen bir işlem seçin [0-15]: "
+    echo -ne "Lütfen bir işlem seçin [0-16]: "
     read -r SECIM
 
     case "$SECIM" in
@@ -177,12 +178,18 @@ while true; do
             "$ROOT_DIR/scripts/notify_webhook.sh" --test
             pause
             ;;
+        16)
+            clear
+            echo -e "${BLUE}=== GPG Web Anahtar Sunucusu (WKD) Kurulumu & Doğrulama ===${NC}"
+            "$ROOT_DIR/scripts/setup_wkd.py"
+            pause
+            ;;
         0|q|Q)
             echo -e "\n${GREEN}Görüşmek üzere!${NC}"
             exit 0
             ;;
         *)
-            echo -e "${RED}Geçersiz seçim! Lütfen 0 ile 15 arasında bir sayı girin.${NC}"
+            echo -e "${RED}Geçersiz seçim! Lütfen 0 ile 16 arasında bir sayı girin.${NC}"
             sleep 1
             ;;
     esac

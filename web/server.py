@@ -441,6 +441,47 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
             })
             return
 
+        elif path == "/api/wkd/status":
+            wkd_dir = ROOT_DIR / ".well-known" / "openpgpkey"
+            policy_ok = (wkd_dir / "policy").is_file()
+            hu_dir = wkd_dir / "hu"
+            hashes = [f.name for f in hu_dir.glob("*")] if hu_dir.is_dir() else []
+            self.send_json_response({
+                "enabled": policy_ok and len(hashes) > 0,
+                "domain": "parslinux.org",
+                "emails": ["repo@parslinux.org", "dev@parslinux.org", "support@parslinux.org", "contact@parslinux.org"],
+                "hashes": {
+                    "repo@parslinux.org": "gkux3qirko9oqgy8uy54k78iopxuno96",
+                    "dev@parslinux.org": "gudx35f8m3ns6jx87gkuda1nmtsb53nd"
+                },
+                "policy_url": "/.well-known/openpgpkey/policy",
+                "test_command": "gpg --locate-keys repo@parslinux.org"
+            })
+            return
+
+        elif path.startswith("/.well-known/openpgpkey/"):
+            rel_wkd = path[len("/.well-known/openpgpkey/"):].strip("/")
+            candidates = [
+                ROOT_DIR / ".well-known" / "openpgpkey" / rel_wkd,
+                PUBLIC_DIR / ".well-known" / "openpgpkey" / rel_wkd
+            ]
+            for target_file in candidates:
+                if target_file.is_file():
+                    content = target_file.read_bytes()
+                    self.send_response(200)
+                    if target_file.name == "policy":
+                        self.send_header("Content-Type", "text/plain; charset=utf-8")
+                    else:
+                        self.send_header("Content-Type", "application/octet-stream")
+                    self.send_header("Content-Length", str(len(content)))
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.send_header("Cache-Control", "public, max-age=3600")
+                    self.end_headers()
+                    self.wfile.write(content)
+                    return
+            self.send_error(404, f"WKD anahtarı bulunamadı: {path}")
+            return
+
         # 2. Web UI Dosyaları (index.html, index.css, app.js, install.sh)
         if path == "/install.sh":
             sh_path = ROOT_DIR / "scripts" / "install_client_oneline.sh"

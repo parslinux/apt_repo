@@ -416,6 +416,33 @@
                             <span id="uploadProgressText" style="font-size: 0.88rem; color: var(--text-muted);"></span>
                         </div>
                     </div>
+
+                    <!-- Depodaki Son Paketler ve Yayın Durumu -->
+                    <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <h4 style="font-size: 1.05rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+                                <span>📦</span> Depodaki Son Paketler ve Yayın Durumu
+                            </h4>
+                            <span class="badge badge-emerald" id="uploadedPackagesCountBadge">Yükleniyor...</span>
+                        </div>
+                        <div class="table-responsive" style="overflow-x: auto;">
+                            <table class="metrics-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Paket Adı</th>
+                                        <th>Sürüm</th>
+                                        <th>Mimari</th>
+                                        <th>Bölüm / Depo</th>
+                                        <th>Boyut</th>
+                                        <th>Durum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentUploadsTableBody">
+                                    <!-- Dinamik dolar -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -487,6 +514,19 @@
                         </button>
                     </div>
                     <pre class="webhook-output-console" id="webhookConsoleOutput" style="display: none;"></pre>
+                </div>
+
+                <!-- Canlı Bildirim İletim Günlüğü -->
+                <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <h4 style="font-size: 1.05rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📋</span> Son Webhook Bildirim İletimleri
+                        </h4>
+                        <span class="badge badge-primary">Canlı Akış</span>
+                    </div>
+                    <div id="webhookEventsFeed" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <!-- Dinamik Webhook Olayları -->
+                    </div>
                 </div>
 
                 <div style="margin-top: 1.5rem; background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-color); border-radius: 10px; padding: 1rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary);">

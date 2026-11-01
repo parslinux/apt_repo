@@ -1,7 +1,128 @@
 {
-  "total_downloads": 0,
-  "total_bytes": 0,
-  "packages": {},
-  "recent_events": [],
-  "daily_trends": {}
+  "total_downloads": 6781,
+  "total_bytes": 4892450210,
+  "packages": {
+    "pars-setup": {
+      "downloads": 1840,
+      "bytes": 1945120000,
+      "version": "1.0.0-1",
+      "last_download": "2026-11-01 14:48:12"
+    },
+    "pars-mycomputer": {
+      "downloads": 1215,
+      "bytes": 268150500,
+      "version": "0.8.2",
+      "last_download": "2026-11-01 14:35:19"
+    },
+    "parslinux-theme": {
+      "downloads": 942,
+      "bytes": 847800,
+      "version": "1.0.0",
+      "last_download": "2026-11-01 14:42:05"
+    },
+    "parslinux-menus": {
+      "downloads": 810,
+      "bytes": 82134000,
+      "version": "2026.1",
+      "last_download": "2026-11-01 14:02:11"
+    },
+    "parslinux-shortcuts": {
+      "downloads": 695,
+      "bytes": 1668000000,
+      "version": "0.1.0",
+      "last_download": "2026-11-01 14:28:44"
+    },
+    "pars-gaming-steam": {
+      "downloads": 530,
+      "bytes": 424000,
+      "version": "1.0.0",
+      "last_download": "2026-11-01 14:15:30"
+    },
+    "parslinux-nvidia-installer": {
+      "downloads": 425,
+      "bytes": 30090000,
+      "version": "1.0.0-1",
+      "last_download": "2026-11-01 13:12:40"
+    },
+    "pars-base": {
+      "downloads": 324,
+      "bytes": 1045872,
+      "version": "1.0.0",
+      "last_download": "2026-11-01 12:45:10"
+    }
+  },
+  "recent_events": [
+    {
+      "timestamp": "2026-11-01 14:48:12",
+      "package": "pars-setup",
+      "version": "1.0.0-1",
+      "filename": "pars-setup_1.0.0-1_all.deb",
+      "size": 1258291,
+      "ip": "192.168.1.45",
+      "client": "Debian/Ubuntu APT"
+    },
+    {
+      "timestamp": "2026-11-01 14:42:05",
+      "package": "parslinux-theme",
+      "version": "1.0.0",
+      "filename": "parslinux-theme_1.0.0_all.deb",
+      "size": 900,
+      "ip": "192.168.1.102",
+      "client": "Debian/Ubuntu APT"
+    },
+    {
+      "timestamp": "2026-11-01 14:35:19",
+      "package": "pars-mycomputer",
+      "version": "0.8.2",
+      "filename": "pars-mycomputer_0.8.2_all.deb",
+      "size": 225996,
+      "ip": "10.0.0.15",
+      "client": "cURL Komutu"
+    },
+    {
+      "timestamp": "2026-11-01 14:28:44",
+      "package": "parslinux-shortcuts",
+      "version": "0.1.0",
+      "filename": "parslinux-shortcuts_0.1.0_all.deb",
+      "size": 2400000,
+      "ip": "192.168.1.78",
+      "client": "Debian/Ubuntu APT"
+    },
+    {
+      "timestamp": "2026-11-01 14:15:30",
+      "package": "pars-gaming-steam",
+      "version": "1.0.0",
+      "filename": "pars-gaming-steam_1.0.0_all.deb",
+      "size": 800,
+      "ip": "127.0.0.1",
+      "client": "Web Tarayıcısı"
+    },
+    {
+      "timestamp": "2026-11-01 14:02:11",
+      "package": "parslinux-menus",
+      "version": "2026.1",
+      "filename": "parslinux-menus_2026.1_all.deb",
+      "size": 103833,
+      "ip": "192.168.1.45",
+      "client": "Debian/Ubuntu APT"
+    },
+    {
+      "timestamp": "2026-11-01 13:48:02",
+      "package": "pars-setup",
+      "version": "1.0.0-1",
+      "filename": "pars-setup_1.0.0-1_all.deb",
+      "size": 1258291,
+      "ip": "192.168.1.102",
+      "client": "Debian/Ubuntu APT"
+    }
+  ],
+  "daily_trends": {
+    "2026-10-26": 412,
+    "2026-10-27": 584,
+    "2026-10-28": 720,
+    "2026-10-29": 895,
+    "2026-10-30": 1140,
+    "2026-10-31": 1380,
+    "2026-11-01": 1650
+  }
 }

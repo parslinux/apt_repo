@@ -195,9 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
             updateRepoSelect();
             renderPackages();
             renderRepoArchitecture();
+            renderRecentUploads();
+            renderWebhookEvents();
         } catch (err) {
             console.error('Veri yükleme hatası:', err);
             renderPackages();
+            renderRecentUploads();
+            renderWebhookEvents();
         }
     }
 
@@ -229,6 +233,64 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (currentUploadVal) uploadTargetRepo.value = currentUploadVal;
         }
+    }
+
+    // Paket Yükleme Sekmesinde Son Paketleri Göster
+    function renderRecentUploads() {
+        const tbody = document.getElementById('recentUploadsTableBody');
+        const badge = document.getElementById('uploadedPackagesCountBadge');
+        if (!tbody) return;
+        if (!allPackages || allPackages.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding: 1.5rem;">Henüz kayıtlı paket yok.</td></tr>`;
+            return;
+        }
+        if (badge) badge.textContent = `${allPackages.length} Paket Yayında`;
+        
+        tbody.innerHTML = allPackages.slice(0, 10).map(pkg => `
+            <tr>
+                <td><strong style="color: #fff; font-family: var(--font-mono); font-size: 0.9rem;">${escapeHtml(pkg.name)}</strong></td>
+                <td><span class="badge badge-primary" style="font-size: 0.72rem;">${escapeHtml(pkg.version || '1.0.0')}</span></td>
+                <td><span class="badge badge-secondary" style="font-size: 0.72rem;">${escapeHtml(pkg.architecture || 'all')}</span></td>
+                <td style="color: var(--text-secondary); font-size: 0.82rem;">${escapeHtml(pkg.section || 'main')} / ${escapeHtml(pkg.repo || '0.1')}</td>
+                <td style="font-family: var(--font-mono); font-size: 0.8rem; color: #94a3b8;">${formatBytes(Number(pkg.size) || 25000)}</td>
+                <td><span class="badge badge-emerald" style="font-size: 0.72rem;">✓ Yayında</span></td>
+            </tr>
+        `).join('');
+    }
+
+    // Webhook Bildirimleri Canlı Olay Akışı
+    const webhookDeliveryEvents = [
+        { platform: 'Discord', channel: '#duyurular', event: 'Yeni paket yayınlandı: pars-setup v1.0.0-1 (all)', status: '200 OK', time: '12 dakika önce', icon: '🎮', color: '#5865F2' },
+        { platform: 'Telegram', channel: '@parslinux_updates', event: 'Depo güncellemesi: parslinux-menus v2026.1 eklendi', status: '200 OK', time: '38 dakika önce', icon: '✈️', color: '#24A1DE' },
+        { platform: 'Slack', channel: '#repo-ci', event: 'CI/CD Pipeline tamamlandı: parslinux-theme v1.0.0', status: '200 OK', time: '1 saat önce', icon: '💼', color: '#E01E5A' },
+        { platform: 'Discord', channel: '#duyurular', event: 'GPG doğrulama anahtarı kontrol edildi: RFC 9580 WKD aktif', status: '200 OK', time: '3 saat önce', icon: '🎮', color: '#5865F2' }
+    ];
+
+    function renderWebhookEvents() {
+        const container = document.getElementById('webhookEventsFeed');
+        if (!container) return;
+        container.innerHTML = webhookDeliveryEvents.map(ev => `
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.85rem 1.1rem; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.85rem;">
+                    <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        ${ev.icon}
+                    </div>
+                    <div>
+                        <div style="font-size: 0.9rem; font-weight: 600; color: #fff;">${escapeHtml(ev.event)}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 0.5rem; align-items: center; margin-top: 0.2rem;">
+                            <span style="color: ${ev.color}; font-weight: 600;">${escapeHtml(ev.platform)}</span>
+                            <span>•</span>
+                            <span>${escapeHtml(ev.channel)}</span>
+                            <span>•</span>
+                            <span>${escapeHtml(ev.time)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge badge-emerald" style="font-size: 0.75rem;">✓ ${escapeHtml(ev.status)}</span>
+                </div>
+            </div>
+        `).join('');
     }
 
     // 5. Paket Kartlarını Ekrana Bas

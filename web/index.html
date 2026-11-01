@@ -718,6 +718,45 @@
                     </div>
                 </div>
 
+                <!-- Coğrafi İstemci Dağılımı (GeoIP Analitiği) -->
+                <div class="metrics-geoip-card" style="margin-top: 1.5rem; background: var(--surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 1.5rem;">
+                    <div class="metrics-box-header" style="margin-bottom: 1.25rem;">
+                        <h4 class="metrics-box-title" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem; color: #fff; font-weight: 700;">
+                            <span>🌍</span> İstemci Coğrafi Dağılımı (GeoIP Analitiği)
+                        </h4>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span class="badge badge-primary" id="geoTotalCountriesBadge">0 Ülke</span>
+                            <span class="badge badge-emerald" id="geoTopRegionBadge">Lider: -</span>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                        <!-- Sol: Ülke Liderlik Tablosu ve Yüzdelik İlerleme Çubukları -->
+                        <div>
+                            <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Ülke Bazlı İndirme Oranları
+                            </div>
+                            <div id="geoCountriesList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <div class="text-center text-muted" style="padding: 1.5rem 1rem;">
+                                    Henüz coğrafi indirme verisi bulunmuyor.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sağ: Şehir Bulutu & Dağılım Rozetleri -->
+                        <div>
+                            <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Şehir & Bölge Dağılımı (İstek Noktaları)
+                            </div>
+                            <div id="geoCitiesList" style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start; padding: 0.85rem; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; min-height: 100px;">
+                                <div class="text-center text-muted" style="width: 100%; padding: 1.5rem 1rem;">
+                                    İstek geldikçe tespit edilen şehirler burada listelenir.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Alt Aksiyon Çubuğu -->
                 <div class="metrics-actions-bar">
                     <div class="metrics-actions-left">

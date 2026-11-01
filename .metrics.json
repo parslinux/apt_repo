@@ -1,12 +1,12 @@
 {
-  "total_downloads": 6781,
-  "total_bytes": 4892450210,
+  "total_downloads": 6785,
+  "total_bytes": 4893679010,
   "packages": {
     "pars-setup": {
-      "downloads": 1840,
-      "bytes": 1945120000,
-      "version": "1.0.0-1",
-      "last_download": "2026-11-01 14:48:12"
+      "downloads": 1843,
+      "bytes": 1946041600,
+      "version": "1.0.0",
+      "last_download": "2026-11-01 18:47:16"
     },
     "pars-mycomputer": {
       "downloads": 1215,
@@ -49,9 +49,67 @@
       "bytes": 1045872,
       "version": "1.0.0",
       "last_download": "2026-11-01 12:45:10"
+    },
+    "pars-branding": {
+      "downloads": 1,
+      "bytes": 307200,
+      "version": "1.0.0",
+      "last_download": "2026-11-01 18:46:46"
     }
   },
   "recent_events": [
+    {
+      "timestamp": "2026-11-01 18:47:16",
+      "package": "pars-setup",
+      "version": "1.0.0",
+      "filename": "pars-setup_1.0.0_all.deb",
+      "size": 307200,
+      "ip": "94.54.32.19",
+      "client": "Simüle İndirme (Test)",
+      "country": "Türkiye",
+      "country_code": "TR",
+      "flag": "🇹🇷",
+      "city": "İzmir"
+    },
+    {
+      "timestamp": "2026-11-01 18:47:16",
+      "package": "pars-setup",
+      "version": "1.0.0",
+      "filename": "pars-setup_1.0.0_all.deb",
+      "size": 307200,
+      "ip": "94.54.32.19",
+      "client": "Simüle İndirme (Test)",
+      "country": "Türkiye",
+      "country_code": "TR",
+      "flag": "🇹🇷",
+      "city": "İzmir"
+    },
+    {
+      "timestamp": "2026-11-01 18:47:16",
+      "package": "pars-setup",
+      "version": "1.0.0",
+      "filename": "pars-setup_1.0.0_all.deb",
+      "size": 307200,
+      "ip": "142.250.185.206",
+      "client": "Simüle İndirme (Test)",
+      "country": "ABD",
+      "country_code": "US",
+      "flag": "🇺🇸",
+      "city": "New York"
+    },
+    {
+      "timestamp": "2026-11-01 18:46:46",
+      "package": "pars-branding",
+      "version": "1.0.0",
+      "filename": "pars-branding_1.0.0_all.deb",
+      "size": 307200,
+      "ip": "145.220.21.9",
+      "client": "Simüle İndirme (Test)",
+      "country": "Hollanda",
+      "country_code": "NL",
+      "flag": "🇳🇱",
+      "city": "Amsterdam"
+    },
     {
       "timestamp": "2026-11-01 14:48:12",
       "package": "pars-setup",
@@ -123,6 +181,28 @@
     "2026-10-29": 895,
     "2026-10-30": 1140,
     "2026-10-31": 1380,
-    "2026-11-01": 1650
+    "2026-11-01": 1654
+  },
+  "geo_distribution": {
+    "Hollanda": {
+      "count": 1,
+      "code": "NL",
+      "flag": "🇳🇱"
+    },
+    "ABD": {
+      "count": 1,
+      "code": "US",
+      "flag": "🇺🇸"
+    },
+    "Türkiye": {
+      "count": 2,
+      "code": "TR",
+      "flag": "🇹🇷"
+    }
+  },
+  "city_distribution": {
+    "🇳🇱 Amsterdam, NL": 1,
+    "🇺🇸 New York, US": 1,
+    "🇹🇷 İzmir, TR": 2
   }
 }

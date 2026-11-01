@@ -110,6 +110,45 @@ def inspect_deb_package(pkg_name: str, pkg_version: str = ""):
     except Exception as e:
         return {"success": False, "error": f"Paket ayrıştırma hatası: {e}"}
 
+_GEOIP_CACHE = {}
+
+def resolve_ip_location(ip: str):
+    """Verilen IP adresini ülke, şehir ve bayrak bilgisine çevirir."""
+    if not ip or ip in ("127.0.0.1", "::1", "localhost"):
+        return {"country": "Türkiye (Yerel)", "code": "TR", "flag": "🇹🇷", "city": "Yerel Sunucu"}
+    
+    if ip.startswith(("192.168.", "10.", "172.16.", "172.17.", "172.18.", "172.19.", "172.20.", "172.21.", "172.22.", "172.23.", "172.24.", "172.25.", "172.26.", "172.27.", "172.28.", "172.29.", "172.30.", "172.31.")):
+        return {"country": "Yerel Ağ (LAN)", "code": "LAN", "flag": "🏠", "city": "Özel Ağ"}
+        
+    if ip in _GEOIP_CACHE:
+        return _GEOIP_CACHE[ip]
+
+    # Hızlı GeoIP sorgusu (1 saniye zaman aşımı ile)
+    try:
+        req = urllib.request.Request(
+            f"http://ip-api.com/json/{ip}?fields=status,country,countryCode,city",
+            headers={"User-Agent": "ParsLinux-Apt-Repo/1.0"}
+        )
+        with urllib.request.urlopen(req, timeout=1.2) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if data.get("status") == "success":
+                code = data.get("countryCode", "UN")
+                flag = "".join(chr(127397 + ord(c)) for c in code.upper()) if len(code) == 2 else "🌐"
+                res = {
+                    "country": data.get("country", "Bilinmeyen Ülke"),
+                    "code": code,
+                    "flag": flag,
+                    "city": data.get("city", "Bilinmiyor")
+                }
+                _GEOIP_CACHE[ip] = res
+                return res
+    except Exception:
+        pass
+
+    fallback = {"country": "Bilinmeyen Konum", "code": "UN", "flag": "🌐", "city": "Bilinmiyor"}
+    _GEOIP_CACHE[ip] = fallback
+    return fallback
+
 class MetricsTracker:
     _lock = threading.Lock()
 
@@ -126,7 +165,9 @@ class MetricsTracker:
             "total_bytes": 0,
             "packages": {},
             "recent_events": [],
-            "daily_trends": {}
+            "daily_trends": {},
+            "geo_distribution": {},
+            "city_distribution": {}
         }
 
     @classmethod
@@ -138,7 +179,7 @@ class MetricsTracker:
             print(f"[Metrik Kayıt Hatası] {e}", file=sys.stderr)
 
     @classmethod
-    def record_download(cls, filename, file_size, client_ip="127.0.0.1", user_agent=""):
+    def record_download(cls, filename, file_size, client_ip="127.0.0.1", user_agent="", geo_override=None):
         base_name = filename.replace(".deb", "")
         parts = base_name.split("_")
         pkg_name = parts[0] if parts else base_name
@@ -159,6 +200,9 @@ class MetricsTracker:
 
         now_iso = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         today = datetime.now().strftime("%Y-%m-%d")
+
+        # GeoIP Konum Çözümleme
+        loc = geo_override if geo_override else resolve_ip_location(client_ip)
 
         with cls._lock:
             data = cls._load_data()
@@ -181,6 +225,19 @@ class MetricsTracker:
             trends = data.setdefault("daily_trends", {})
             trends[today] = trends.get(today, 0) + 1
 
+            # Ülke ve Şehir Dağılımını Güncelle
+            geo = data.setdefault("geo_distribution", {})
+            c_entry = geo.setdefault(loc["country"], {
+                "count": 0,
+                "code": loc.get("code", "UN"),
+                "flag": loc.get("flag", "🌐")
+            })
+            c_entry["count"] += 1
+
+            cities = data.setdefault("city_distribution", {})
+            c_key = f"{loc.get('flag', '🌐')} {loc.get('city', 'Bilinmiyor')}, {loc.get('code', 'UN')}"
+            cities[c_key] = cities.get(c_key, 0) + 1
+
             recent = data.setdefault("recent_events", [])
             recent.insert(0, {
                 "timestamp": now_iso,
@@ -189,7 +246,11 @@ class MetricsTracker:
                 "filename": filename,
                 "size": file_size,
                 "ip": client_ip,
-                "client": client_name
+                "client": client_name,
+                "country": loc.get("country", "Bilinmiyor"),
+                "country_code": loc.get("code", "UN"),
+                "flag": loc.get("flag", "🌐"),
+                "city": loc.get("city", "Bilinmiyor")
             })
             data["recent_events"] = recent[:40]
 
@@ -217,7 +278,9 @@ class MetricsTracker:
             "unique_packages": len(pkgs_list),
             "top_packages": pkgs_list,
             "recent_events": data.get("recent_events", []),
-            "daily_trends": data.get("daily_trends", {})
+            "daily_trends": data.get("daily_trends", {}),
+            "geo_distribution": data.get("geo_distribution", {}),
+            "city_distribution": data.get("city_distribution", {})
         }
 
     @classmethod
@@ -228,7 +291,9 @@ class MetricsTracker:
                 "total_bytes": 0,
                 "packages": {},
                 "recent_events": [],
-                "daily_trends": {}
+                "daily_trends": {},
+                "geo_distribution": {},
+                "city_distribution": {}
             })
 
 def run_cmd(args):
@@ -668,9 +733,24 @@ class AptlyDashboardHandler(SimpleHTTPRequestHandler):
             version = body.get("version", "1.0.0")
             fname = f"{pkg_name}_{version}_all.deb"
             fsize = int(body.get("size", 1024 * 300))
-            client_ip = self.client_address[0] if self.client_address else "127.0.0.1"
-            MetricsTracker.record_download(fname, fsize, client_ip, "Simüle İndirme (Test)")
-            return self.send_json_response({"success": True, "message": f"'{pkg_name}' için indirme metriklerine test kaydı eklendi."})
+            
+            import random
+            sample_locations = [
+                {"ip": "176.234.12.85", "country": "Türkiye", "code": "TR", "flag": "🇹🇷", "city": "İstanbul"},
+                {"ip": "78.188.45.12", "country": "Türkiye", "code": "TR", "flag": "🇹🇷", "city": "Ankara"},
+                {"ip": "94.54.32.19", "country": "Türkiye", "code": "TR", "flag": "🇹🇷", "city": "İzmir"},
+                {"ip": "85.214.132.117", "country": "Almanya", "code": "DE", "flag": "🇩🇪", "city": "Berlin"},
+                {"ip": "142.250.185.206", "country": "ABD", "code": "US", "flag": "🇺🇸", "city": "New York"},
+                {"ip": "145.220.21.9", "country": "Hollanda", "code": "NL", "flag": "🇳🇱", "city": "Amsterdam"},
+                {"ip": "51.89.144.12", "country": "Birleşik Krallık", "code": "GB", "flag": "🇬🇧", "city": "Londra"}
+            ]
+            picked = random.choice(sample_locations)
+            client_ip = body.get("ip") or picked["ip"]
+            MetricsTracker.record_download(fname, fsize, client_ip, "Simüle İndirme (Test)", geo_override=picked)
+            return self.send_json_response({
+                "success": True, 
+                "message": f"'{pkg_name}' için test kaydı eklendi ({picked['flag']} {picked['city']}, {picked['country']})."
+            })
 
         elif parsed.path == "/api/snapshot/create":
             if not self.verify_auth():

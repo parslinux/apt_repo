@@ -135,11 +135,24 @@ Bu belge, APT Depo Yönetim Projesi'nin mevcut durumunu, tamamlanan adımların�
 
 ---
 
-## 🔮 Gelecek İyileştirmeler (Genişletme Fikirleri)
+- [x] **📸 Snapshot Otomatik Yedekleme Kancası (Auto-Snapshot Hook & Rotasyon):**
+  - Hem CLI (`scripts/02_add_package.sh`) hem de Web API (`POST /api/upload`) üzerinden paket eklenmeden önce anında `auto-<repo>-<timestamp>` formatında değişmez sistem yedeği oluşturma.
+  - En son 5 otomatik snapshot'ı saklayıp eski olanları temizleyen güvenli rotasyon mekanizması.
+  - Web kontrol panelinde otomatik snapshot'lara özel `🤖 Otomatik Yedek` rozeti.
+- [x] **🌍 Paket İndirme İstemci Coğrafi Dağılımı (GeoIP Analitiği):**
+  - İndirme isteklerindeki IP adreslerini ülke, şehir ve bayrak emojisine dönüştüren entegre GeoIP çözümleyici (`resolve_ip_location`).
+  - İndirme Analitiği sekmesine "İstemci Coğrafi Dağılımı" görsel kartı: Ülke yüzdelik ilerleme çubukları, lider bölge rozeti ve şehir rozet bulutu.
+  - Canlı indirme akışında (feed) her istek için ülke bayrağı ve şehir etiketi gösterimi.
+- [x] **📝 Otomatik Debian Changelog Üretici (Debian Policy Uyumlu):**
+  - `scripts/generate_changelog.py`: RFC-2822 tarih formatına ve Debian standartlarına tam uyumlu changelog üretici.
+  - `--git` parametresi veya etkileşimli mod ile son git commit mesajlarından otomatik madde türetme.
+  - Mevcut `debian/changelog` dosyalarının başına yeni sürüm bloğunu ekleme (prepend) desteği.
+  - `manage.sh` kontrol konsoluna Seçenek 19 olarak entegrasyon.
 
-- [ ] **Paket İndirme İstemci Coğrafi Dağılımı (GeoIP):** İndirmelerin hangi ülke/şehirlerden yapıldığını gösteren IP analitiği.
-- [ ] **Otomatik Debian Changelog Üretici:** Yapılan değişikliklerden otomatik `debian/changelog` oluşturan araç.
-- [ ] **Snapshot Zamanlanmış Yedekleme (Auto-Snapshot Cron):** Her paket yükleme öncesinde otomatik snapshot alma seçeneği.
+---
+
+## 🚀 Proje Durumu
+Proje genelinde hedeflenen tüm temel, ileri düzey ve geleceğe yönelik geliştirme maddeleri %100 başarıyla tamamlanmış, test edilmiş ve commit edilmiştir.
 
 
 

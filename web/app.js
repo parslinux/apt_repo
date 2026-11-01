@@ -1237,6 +1237,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <span class="feed-meta">
                                     <span>${escapeHtml(ev.timestamp)}</span>
                                     <span>•</span>
+                                    <span style="display: inline-flex; align-items: center; gap: 0.25rem;">
+                                        <span>${escapeHtml(ev.flag || '🌐')}</span>
+                                        <span>${escapeHtml(ev.city || 'Bilinmiyor')}</span>
+                                    </span>
+                                    <span>•</span>
                                     <span>${escapeHtml(ev.ip)}</span>
                                     <span>•</span>
                                     <span>${formatBytes(ev.size)}</span>
@@ -1248,10 +1253,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // 4. Zaman Serisi Grafiğini Render Et
+            // 4. Coğrafi Dağılımı (GeoIP) Render Et
+            renderGeoAnalytics(data);
+
+            // 5. Zaman Serisi Grafiğini Render Et
             renderDownloadTrendsChart(data);
         } catch (err) {
             console.error('Metrik yükleme hatası:', err);
+        }
+    }
+
+    // 12.1 Coğrafi Dağılım (GeoIP) Görselleştirici
+    function renderGeoAnalytics(data) {
+        const countriesList = document.getElementById('geoCountriesList');
+        const citiesList = document.getElementById('geoCitiesList');
+        const totalCountriesBadge = document.getElementById('geoTotalCountriesBadge');
+        const topRegionBadge = document.getElementById('geoTopRegionBadge');
+
+        const geoDist = data.geo_distribution || {};
+        const cityDist = data.city_distribution || {};
+        const countries = Object.entries(geoDist);
+
+        if (totalCountriesBadge) {
+            totalCountriesBadge.textContent = `${countries.length} Ülke`;
+        }
+
+        if (countries.length === 0) {
+            if (countriesList) countriesList.innerHTML = '<div class="text-center text-muted" style="padding: 1.5rem 1rem;">Henüz coğrafi indirme verisi bulunmuyor.</div>';
+            if (citiesList) citiesList.innerHTML = '<div class="text-center text-muted" style="width: 100%; padding: 1.5rem 1rem;">İstek geldikçe tespit edilen şehirler burada listelenir.</div>';
+            if (topRegionBadge) topRegionBadge.textContent = 'Lider: -';
+            return;
+        }
+
+        // En çok indiren ülkeye göre sırala
+        countries.sort((a, b) => b[1].count - a[1].count);
+        const topCountry = countries[0];
+        if (topRegionBadge) {
+            topRegionBadge.textContent = `Lider: ${topCountry[1].flag || ''} ${topCountry[0]}`;
+        }
+
+        const totalDl = data.total_downloads || 1;
+
+        if (countriesList) {
+            countriesList.innerHTML = countries.map(([cName, info]) => {
+                const count = info.count || 0;
+                const pct = ((count / totalDl) * 100).toFixed(1);
+                return `
+                    <div class="geo-country-row" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem;">
+                            <span style="display: flex; align-items: center; gap: 0.5rem; color: #fff; font-weight: 500;">
+                                <span style="font-size: 1.15rem;">${escapeHtml(info.flag || '🌐')}</span>
+                                <span>${escapeHtml(cName)}</span>
+                                <span style="font-size: 0.72rem; color: var(--text-secondary); background: rgba(255,255,255,0.06); padding: 0.1rem 0.4rem; border-radius: 4px;">${escapeHtml(info.code || '')}</span>
+                            </span>
+                            <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">
+                                <b style="color: #38bdf8;">${count}</b> indirme (${pct}%)
+                            </span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;">
+                            <div style="height: 100%; width: ${pct}%; background: linear-gradient(90deg, #6366f1, #38bdf8); border-radius: 999px; transition: width 0.4s ease;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        if (citiesList) {
+            const cities = Object.entries(cityDist);
+            cities.sort((a, b) => b[1] - a[1]);
+            citiesList.innerHTML = cities.map(([cityKey, cCount]) => `
+                <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: #cbd5e1; padding: 0.3rem 0.65rem; border-radius: 20px; font-size: 0.8rem;">
+                    <span>${escapeHtml(cityKey)}</span>
+                    <span style="background: var(--primary); color: #fff; font-size: 0.72rem; padding: 0.1rem 0.4rem; border-radius: 10px; font-weight: 600;">${cCount}</span>
+                </div>
+            `).join('');
         }
     }
 

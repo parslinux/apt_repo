@@ -47,6 +47,7 @@ show_menu() {
     echo -e "  ${BLUE}15)${NC} 📢 Webhook Bildirim Testi & Ayarları (notify_webhook.sh)"
     echo -e "  ${CYAN}16)${NC} 🌐 GPG Web Anahtar Sunucusu (WKD) Kur & Doğrula (setup_wkd.py)"
     echo -e "  ${GREEN}17)${NC} 📸 Depo Snapshot (Anlık Görüntü) & Rollback (09_manage_snapshots.sh)"
+    echo -e "  ${CYAN}18)${NC} 🚀 GitHub Pages Web Portalını Derle & Güncelle (build_gh_pages.py)"
     echo ""
     echo -e "  ${RED}0)${NC} ❌ Çıkış"
     echo -e "${BLUE}================================================================${NC}"
@@ -60,7 +61,7 @@ pause() {
 
 while true; do
     show_menu
-    echo -ne "Lütfen bir işlem seçin [0-17]: "
+    echo -ne "Lütfen bir işlem seçin [0-18]: "
     read -r SECIM
 
     case "$SECIM" in
@@ -190,12 +191,18 @@ while true; do
             "$ROOT_DIR/scripts/09_manage_snapshots.sh" menu
             pause
             ;;
+        18)
+            clear
+            echo -e "${BLUE}=== GitHub Pages Web Portalı Derleniyor ===${NC}"
+            python3 "$ROOT_DIR/scripts/build_gh_pages.py"
+            pause
+            ;;
         0|q|Q)
             echo -e "\n${GREEN}Görüşmek üzere!${NC}"
             exit 0
             ;;
         *)
-            echo -e "${RED}Geçersiz seçim! Lütfen 0 ile 17 arasında bir sayı girin.${NC}"
+            echo -e "${RED}Geçersiz seçim! Lütfen 0 ile 18 arasında bir sayı girin.${NC}"
             sleep 1
             ;;
     esac
